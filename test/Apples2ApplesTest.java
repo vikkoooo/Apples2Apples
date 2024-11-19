@@ -1,6 +1,8 @@
+package test;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import src.Apples2Apples;
 import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,12 +15,13 @@ class Apples2ApplesTest {
 		System.out.println("Starting setup");
 		try {
 			game = new Apples2Apples(0);
-			System.out.println("Created game instance");
+			System.out.println("Created game instance"); // I will never reach this line
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception thrown during setup: " + e.getMessage());
 		}
 		System.out.println("Setup complete");
+		// Therefore, I will never reach these lists which I wanted to use in my tests
 		game.redApples = new ArrayList<>();
 		game.greenApples = new ArrayList<>();
 		game.players = new ArrayList<>();

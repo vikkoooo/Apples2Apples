@@ -1,3 +1,5 @@
+package src;
+
 import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -240,9 +242,9 @@ public class Apples2Apples {
 	 **/
 	public Apples2Apples(int numberOfOnlinePlayers) throws Exception {
 		redApples = new ArrayList<String>(
-				Files.readAllLines(Paths.get("./", "redApples.txt"), StandardCharsets.ISO_8859_1));
+				Files.readAllLines(Paths.get("./src/", "redApples.txt"), StandardCharsets.ISO_8859_1));
 		greenApples = new ArrayList<String>(
-				Files.readAllLines(Paths.get("./", "greenApples.txt"), StandardCharsets.ISO_8859_1));
+				Files.readAllLines(Paths.get("./src/", "greenApples.txt"), StandardCharsets.ISO_8859_1));
 
 		//shuffle
 		rnd = ThreadLocalRandom.current();
