@@ -97,7 +97,7 @@ public class Player {
 			hand.add(redApple);
 		} else {
 			try {
-				connection.getOutput().writeBytes(redApple + "\n");
+				connection.writeMessage(redApple);
 			} catch (Exception e) {
 			}
 		}
@@ -107,7 +107,7 @@ public class Player {
 		return greenApples;
 	}
 
-	public DataOutputStream getOutToClient() {
-		return connection.getOutput();
+	public ClientOutput getOutToClient() {
+		return connection;
 	}
 }

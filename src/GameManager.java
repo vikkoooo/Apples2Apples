@@ -23,7 +23,7 @@ public class GameManager {
 		for (int i = 0; i < numberOfOnlinePlayers; i++) {
 			Player player = networkManager.acceptConnection(i);
 			String handString = String.join(";", deckManager.dealInitialHand());
-			player.getOutToClient().writeBytes(handString + "\n");
+			player.getOutToClient().writeMessage(handString);
 			players.add(player);
 			System.out.println("Connected to Player ID: " + i);
 		}

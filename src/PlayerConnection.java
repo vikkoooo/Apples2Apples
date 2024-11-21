@@ -3,7 +3,7 @@ package src;
 import java.io.*;
 import java.net.*;
 
-public class PlayerConnection {
+public class PlayerConnection implements ClientOutput {
 	private Socket socket;
 	private BufferedReader input;
 	private DataOutputStream output;
@@ -18,8 +18,9 @@ public class PlayerConnection {
 		return input;
 	}
 
-	public DataOutputStream getOutput() {
-		return output;
+	@Override
+	public void writeMessage(String message) throws IOException {
+		output.writeBytes(message + "\n");
 	}
 
 	public void close() throws IOException {
