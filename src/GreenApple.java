@@ -1,4 +1,3 @@
-// GreenAppleCard.java
 package src;
 
 public class GreenApple extends Card {

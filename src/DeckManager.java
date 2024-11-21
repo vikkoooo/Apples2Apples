@@ -8,8 +8,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DeckManager {
 	private List<Card> redApples;
 	private List<Card> greenApples;
-	private CardFactory nounCardFactory;
-	private CardFactory adjectiveCardFactory;
+	private ICardFactory nounCardFactory;
+	private ICardFactory adjectiveCardFactory;
 
 	public DeckManager() throws Exception {
 		this.redApples = new ArrayList<>();

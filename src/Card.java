@@ -1,4 +1,3 @@
-// Card.java
 package src;
 
 public abstract class Card {

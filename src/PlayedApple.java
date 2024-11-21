@@ -8,9 +8,4 @@ public class PlayedApple {
 		this.playerID = playerID;
 		this.redApple = redApple;
 	}
-
-	// For backward compatibility and display purposes
-	public String getRedAppleText() {
-		return redApple.getText();
-	}
 }
