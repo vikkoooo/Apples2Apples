@@ -2,7 +2,6 @@ package src;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 public class Player {
 	private int playerID;
@@ -28,17 +27,18 @@ public class Player {
 
 	public void play(ArrayList<PlayedApple> playedApples) {
 		if (isBot) {
-			Random rnd = ThreadLocalRandom.current();
-			try {
-				Thread.sleep(rnd.nextInt(500));
-			} catch (Exception e) {
+			// introduce synchronized to fix the race condition, causing the original bug
+			// synchronized makes sure only one thread can modify the shared resource playedApples at a time
+			synchronized (playedApples) {
+				playedApples.add(new PlayedApple(playerID, hand.get(0)));
 			}
-			playedApples.add(new PlayedApple(playerID, hand.get(0)));
 			hand.remove(0);
 		} else if (online) {
 			try {
 				String aPlayedApple = connection.getInput().readLine();
-				playedApples.add(new PlayedApple(playerID, aPlayedApple));
+				synchronized (playedApples) { // sync access to playedApples
+					playedApples.add(new PlayedApple(playerID, aPlayedApple));
+				}
 			} catch (Exception e) {
 			}
 		} else {
@@ -58,7 +58,9 @@ public class Player {
 				play(playedApples);
 			} catch (Exception e) {
 			}
-			playedApples.add(new PlayedApple(playerID, hand.get(choice)));
+			synchronized (playedApples) { // sync access to playedApples
+				playedApples.add(new PlayedApple(playerID, hand.get(choice)));
+			}
 			hand.remove(choice);
 			System.out.println("Waiting for other players\n");
 		}
