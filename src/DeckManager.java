@@ -8,14 +8,14 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DeckManager {
 	private List<Card> redApples;
 	private List<Card> greenApples;
-	private CardFactory redAppleFactory;
-	private CardFactory greenAppleFactory;
+	private CardFactory nounCardFactory;
+	private CardFactory adjectiveCardFactory;
 
 	public DeckManager() throws Exception {
 		this.redApples = new ArrayList<>();
 		this.greenApples = new ArrayList<>();
-		this.redAppleFactory = new RedAppleCardFactory();
-		this.greenAppleFactory = new GreenAppleCardFactory();
+		this.nounCardFactory = new NounCardFactory();
+		this.adjectiveCardFactory = new AdjectiveCardFactory();
 		loadCards();
 		shuffleDecks();
 	}
@@ -28,10 +28,10 @@ public class DeckManager {
 				Paths.get(Constants.GREEN_APPLES_PATH),
 				Charset.forName(Constants.CHARSET));
 		for (String text : redAppleTexts) {
-			redApples.add(redAppleFactory.createCard(text));
+			redApples.add(nounCardFactory.createCard(text));
 		}
 		for (String text : greenAppleTexts) {
-			greenApples.add(greenAppleFactory.createCard(text));
+			greenApples.add(adjectiveCardFactory.createCard(text));
 		}
 	}
 

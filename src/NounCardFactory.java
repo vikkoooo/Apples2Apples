@@ -1,7 +1,6 @@
-// RedAppleCardFactory.java
 package src;
 
-public class RedAppleCardFactory implements CardFactory {
+public class NounCardFactory implements CardFactory {
 	@Override
 	public Card createCard(String text) {
 		return new RedApple(text);
