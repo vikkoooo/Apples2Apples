@@ -8,14 +8,15 @@ public class Player {
 	private boolean isBot;
 	private boolean online;
 	private PlayerConnection connection;
-	private ArrayList<String> hand;
-	private ArrayList<String> greenApples = new ArrayList<>();
+	private List<Card> hand;
+	private List<Card> greenApples;
 
-	public Player(int playerID, ArrayList<String> hand, boolean isBot) {
+	public Player(int playerID, List<Card> initialHand, boolean isBot) {
 		this.playerID = playerID;
-		this.hand = hand;
 		this.isBot = isBot;
 		this.online = false;
+		this.hand = new ArrayList<>(initialHand);
+		this.greenApples = new ArrayList<>();
 	}
 
 	public Player(int playerID, boolean isBot, PlayerConnection connection) {
@@ -23,6 +24,8 @@ public class Player {
 		this.isBot = isBot;
 		this.online = true;
 		this.connection = connection;
+		this.hand = new ArrayList<>();
+		this.greenApples = new ArrayList<>();
 	}
 
 	public void play(ArrayList<PlayedApple> playedApples) {
@@ -37,14 +40,17 @@ public class Player {
 			try {
 				String aPlayedApple = connection.getInput().readLine();
 				synchronized (playedApples) { // sync access to playedApples
-					playedApples.add(new PlayedApple(playerID, aPlayedApple));
+					// Convert the string back to a Card object
+					Card playedCard = new RedApple(aPlayedApple);
+					playedApples.add(new PlayedApple(playerID, playedCard));
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		} else {
 			System.out.println("Choose a red apple to play");
 			for (int i = 0; i < hand.size(); i++) {
-				System.out.println("[" + i + "]   " + hand.get(i));
+				System.out.println("[" + i + "]   " + hand.get(i).getText());
 			}
 			System.out.println("");
 
@@ -57,6 +63,7 @@ public class Player {
 				System.out.println("That is not a valid option");
 				play(playedApples);
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			synchronized (playedApples) { // sync access to playedApples
 				playedApples.add(new PlayedApple(playerID, hand.get(choice)));
@@ -92,18 +99,18 @@ public class Player {
 		}
 	}
 
-	public void addCard(String redApple) {
+	public void addCard(Card redApple) {
 		if (isBot || !online) {
 			hand.add(redApple);
 		} else {
 			try {
-				connection.writeMessage(redApple);
+				connection.writeMessage(redApple.toString());
 			} catch (Exception e) {
 			}
 		}
 	}
 
-	public ArrayList<String> getGreenApples() {
+	public List<Card> getGreenApples() {
 		return greenApples;
 	}
 
