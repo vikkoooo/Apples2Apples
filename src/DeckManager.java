@@ -1,24 +1,38 @@
 package src;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DeckManager {
-	private ArrayList<String> redApples;
-	private ArrayList<String> greenApples;
+	private List<Card> redApples;
+	private List<Card> greenApples;
+	private CardFactory redAppleFactory;
+	private CardFactory greenAppleFactory;
 
 	public DeckManager() throws Exception {
+		this.redApples = new ArrayList<>();
+		this.greenApples = new ArrayList<>();
+		this.redAppleFactory = new RedAppleCardFactory();
+		this.greenAppleFactory = new GreenAppleCardFactory();
 		loadCards();
 		shuffleDecks();
 	}
 
 	private void loadCards() throws Exception {
-		redApples = new ArrayList<>(
-				Files.readAllLines(Paths.get("./src/", "redApples.txt"), StandardCharsets.ISO_8859_1));
-		greenApples = new ArrayList<>(
-				Files.readAllLines(Paths.get("./src/", "greenApples.txt"), StandardCharsets.ISO_8859_1));
+		List<String> redAppleTexts = Files.readAllLines(
+				Paths.get(Constants.RED_APPLES_PATH),
+				Charset.forName(Constants.CHARSET));
+		List<String> greenAppleTexts = Files.readAllLines(
+				Paths.get(Constants.GREEN_APPLES_PATH),
+				Charset.forName(Constants.CHARSET));
+		for (String text : redAppleTexts) {
+			redApples.add(redAppleFactory.createCard(text));
+		}
+		for (String text : greenAppleTexts) {
+			greenApples.add(greenAppleFactory.createCard(text));
+		}
 	}
 
 	private void shuffleDecks() {
@@ -27,19 +41,33 @@ public class DeckManager {
 		Collections.shuffle(greenApples, rnd);
 	}
 
-	public String drawRedApple() {
+	public Card drawRedApple() {
+		if (redApples.isEmpty()) {
+			throw new IllegalStateException("Red apples deck is empty");
+		}
 		return redApples.remove(0);
 	}
 
-	public String drawGreenApple() {
+	public Card drawGreenApple() {
+		if (greenApples.isEmpty()) {
+			throw new IllegalStateException("Green apples deck is empty");
+		}
 		return greenApples.remove(0);
 	}
 
-	public List<String> dealInitialHand() {
-		List<String> hand = new ArrayList<>();
-		for (int i = 0; i < Constants.INITIAL_HAND_SIZE; i++) {
-			hand.add(redApples.remove(0));
+	public List<Card> dealInitialHand(int numberOfCards) {
+		List<Card> hand = new ArrayList<>();
+		for (int i = 0; i < numberOfCards; i++) {
+			hand.add(drawRedApple());
 		}
 		return hand;
+	}
+
+	public boolean hasRedApples() {
+		return !redApples.isEmpty();
+	}
+
+	public boolean hasGreenApples() {
+		return !greenApples.isEmpty();
 	}
 }
