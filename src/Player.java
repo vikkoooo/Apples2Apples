@@ -1,7 +1,6 @@
 package src;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -9,9 +8,7 @@ public class Player {
 	private int playerID;
 	private boolean isBot;
 	private boolean online;
-	private Socket connection;
-	private BufferedReader inFromClient;
-	private DataOutputStream outToClient;
+	private PlayerConnection connection;
 	private ArrayList<String> hand;
 	private ArrayList<String> greenApples = new ArrayList<>();
 
@@ -22,14 +19,11 @@ public class Player {
 		this.online = false;
 	}
 
-	public Player(int playerID, boolean isBot, Socket connection, BufferedReader inFromClient,
-			DataOutputStream outToClient) {
+	public Player(int playerID, boolean isBot, PlayerConnection connection) {
 		this.playerID = playerID;
 		this.isBot = isBot;
 		this.online = true;
 		this.connection = connection;
-		this.inFromClient = inFromClient;
-		this.outToClient = outToClient;
 	}
 
 	public void play(ArrayList<PlayedApple> playedApples) {
@@ -43,7 +37,7 @@ public class Player {
 			hand.remove(0);
 		} else if (online) {
 			try {
-				String aPlayedApple = inFromClient.readLine();
+				String aPlayedApple = connection.getInput().readLine();
 				playedApples.add(new PlayedApple(playerID, aPlayedApple));
 			} catch (Exception e) {
 			}
@@ -76,7 +70,7 @@ public class Player {
 		} else if (online) {
 			int playedAppleIndex = 0;
 			try {
-				playedAppleIndex = Integer.parseInt(inFromClient.readLine());
+				playedAppleIndex = Integer.parseInt(connection.getInput().readLine());
 			} catch (Exception e) {
 			}
 			return playedApples.get(playedAppleIndex);
@@ -101,7 +95,7 @@ public class Player {
 			hand.add(redApple);
 		} else {
 			try {
-				outToClient.writeBytes(redApple + "\n");
+				connection.getOutput().writeBytes(redApple + "\n");
 			} catch (Exception e) {
 			}
 		}
@@ -112,6 +106,6 @@ public class Player {
 	}
 
 	public DataOutputStream getOutToClient() {
-		return outToClient;
+		return connection.getOutput();
 	}
 }
