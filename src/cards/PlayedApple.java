@@ -1,4 +1,4 @@
-package src;
+package src.cards;
 
 public class PlayedApple {
 	public int playerID;

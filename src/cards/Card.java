@@ -1,4 +1,4 @@
-package src;
+package src.cards;
 
 public abstract class Card {
 	private String text;

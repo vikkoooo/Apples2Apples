@@ -1,6 +1,9 @@
-package src;
+package src.network;
 
 import java.net.*;
+
+import src.game.Constants;
+import src.player.Player;
 
 public class NetworkManager {
 	private ServerSocket serverSocket;

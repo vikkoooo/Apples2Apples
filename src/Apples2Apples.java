@@ -1,5 +1,7 @@
 package src;
 
+import src.game.GameManager;
+
 public class Apples2Apples {
 	public static void main(String[] args) {
 		try {

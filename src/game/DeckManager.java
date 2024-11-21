@@ -1,9 +1,14 @@
-package src;
+package src.game;
 
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+
+import src.cards.Card;
+import src.cards.factory.AdjectiveCardFactory;
+import src.cards.factory.ICardFactory;
+import src.cards.factory.NounCardFactory;
 
 public class DeckManager {
 	private List<Card> redApples;

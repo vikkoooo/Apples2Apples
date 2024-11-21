@@ -1,8 +1,13 @@
-package src;
+package src.game;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
+import src.cards.Card;
+import src.cards.PlayedApple;
+import src.network.NetworkManager;
+import src.player.Player;
 
 public class GameManager {
 	private ArrayList<Player> players;

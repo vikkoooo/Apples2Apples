@@ -1,7 +1,13 @@
-package src;
+package src.player;
 
 import java.io.*;
 import java.util.*;
+
+import src.cards.Card;
+import src.cards.PlayedApple;
+import src.cards.RedApple;
+import src.network.ClientOutput;
+import src.network.PlayerConnection;
 
 public class Player {
 	private int playerID;
