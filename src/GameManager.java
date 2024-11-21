@@ -2,6 +2,7 @@ package src;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class GameManager {
 	private ArrayList<Player> players;
@@ -22,7 +23,11 @@ public class GameManager {
 		// Connect online players
 		for (int i = 0; i < numberOfOnlinePlayers; i++) {
 			Player player = networkManager.acceptConnection(i);
-			String handString = String.join(";", deckManager.dealInitialHand());
+			// Convert Cards to strings for network transmission
+			List<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			String handString = hand.stream()
+					.map(Card::getText)
+					.collect(Collectors.joining(";"));
 			player.getOutToClient().writeMessage(handString);
 			players.add(player);
 			System.out.println("Connected to Player ID: " + i);
@@ -30,11 +35,13 @@ public class GameManager {
 
 		// Add bots if needed
 		for (int i = numberOfOnlinePlayers; i < Constants.MIN_PLAYERS - 1; i++) {
-			players.add(new Player(i, new ArrayList<>(deckManager.dealInitialHand()), true));
+			List<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			players.add(new Player(i, hand, true));
 		}
 
 		// Add server player
-		players.add(new Player(players.size(), new ArrayList<>(deckManager.dealInitialHand()), false));
+		List<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+		players.add(new Player(players.size(), hand, false));
 	}
 
 	public void startGame() throws Exception {
@@ -57,8 +64,9 @@ public class GameManager {
 		}
 		System.out.println("*****************************************************");
 
-		String playedGreenApple = deckManager.drawGreenApple();
-		System.out.println("Green apple: " + playedGreenApple + "\n");
+		// Get green apple card and convert to string for display
+		Card greenAppleCard = deckManager.drawGreenApple();
+		System.out.println("Green apple: " + greenAppleCard + "\n");
 
 		for (Player player : players) {
 			if (player != players.get(judge)) {
@@ -74,7 +82,7 @@ public class GameManager {
 		}
 
 		PlayedApple winningApple = players.get(judge).judge(playedApples);
-		players.get(winningApple.playerID).getGreenApples().add(playedGreenApple);
+		players.get(winningApple.playerID).getGreenApples().add(greenAppleCard);
 
 		System.out.println("Player ID " + winningApple.playerID + " won with: " + winningApple.redApple + "\n");
 
@@ -82,7 +90,8 @@ public class GameManager {
 
 		for (Player player : players) {
 			if (player != players.get(judge)) {
-				player.addCard(deckManager.drawRedApple());
+				Card redCard = deckManager.drawRedApple();
+				player.addCard(redCard);
 			}
 		}
 	}
