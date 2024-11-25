@@ -11,8 +11,8 @@ import src.cards.factory.ICardFactory;
 import src.cards.factory.NounCardFactory;
 
 public class DeckManager {
-	private List<Card> redApples;
-	private List<Card> greenApples;
+	private ArrayList<Card> redApples;
+	private ArrayList<Card> greenApples;
 	private ICardFactory nounCardFactory;
 	private ICardFactory adjectiveCardFactory;
 
@@ -60,19 +60,11 @@ public class DeckManager {
 		return greenApples.remove(0);
 	}
 
-	public List<Card> dealInitialHand(int numberOfCards) {
-		List<Card> hand = new ArrayList<>();
+	public ArrayList<Card> dealInitialHand(int numberOfCards) {
+		ArrayList<Card> hand = new ArrayList<>();
 		for (int i = 0; i < numberOfCards; i++) {
 			hand.add(drawRedApple());
 		}
 		return hand;
-	}
-
-	public boolean hasRedApples() {
-		return !redApples.isEmpty();
-	}
-
-	public boolean hasGreenApples() {
-		return !greenApples.isEmpty();
 	}
 }

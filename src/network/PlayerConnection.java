@@ -3,7 +3,7 @@ package src.network;
 import java.io.*;
 import java.net.*;
 
-public class PlayerConnection implements ClientOutput {
+public class PlayerConnection implements IClientOutput {
 	private Socket socket;
 	private BufferedReader input;
 	private DataOutputStream output;

@@ -29,9 +29,9 @@ public class GameManager {
 		for (int i = 0; i < numberOfOnlinePlayers; i++) {
 			Player player = networkManager.acceptConnection(i);
 			// Convert Cards to strings for network transmission
-			List<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			ArrayList<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
 			String handString = hand.stream()
-					.map(Card::getText)
+					.map(Card::toString)
 					.collect(Collectors.joining(";"));
 			player.getOutToClient().writeMessage(handString);
 			players.add(player);
@@ -40,12 +40,12 @@ public class GameManager {
 
 		// Add bots if needed
 		for (int i = numberOfOnlinePlayers; i < Constants.MIN_PLAYERS - 1; i++) {
-			List<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			ArrayList<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
 			players.add(new Player(i, hand, true));
 		}
 
 		// Add server player
-		List<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+		ArrayList<Card> hand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
 		players.add(new Player(players.size(), hand, false));
 	}
 
