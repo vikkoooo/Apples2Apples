@@ -1,22 +1,22 @@
 package src.player;
 
-import java.io.*;
 import java.util.*;
-
 import src.cards.Card;
 import src.cards.PlayedApple;
-import src.cards.RedApple;
-import src.network.ClientOutput;
+import src.network.IClientOutput;
 import src.network.PlayerConnection;
 
 public class Player {
 	private int playerID;
-	private boolean isBot;
-	private boolean online;
+	//private boolean isBot;
+	//private boolean online;
 	private PlayerConnection connection;
-	private List<Card> hand;
-	private List<Card> greenApples;
+	private ArrayList<Card> hand;
+	private ArrayList<Card> greenApples;
+	private IPlayerStrategy strategy;
 
+	// Old constructor for offline and bots
+	/* 
 	public Player(int playerID, List<Card> initialHand, boolean isBot) {
 		this.playerID = playerID;
 		this.isBot = isBot;
@@ -24,7 +24,9 @@ public class Player {
 		this.hand = new ArrayList<>(initialHand);
 		this.greenApples = new ArrayList<>();
 	}
+	*/
 
+	/* 
 	public Player(int playerID, boolean isBot, PlayerConnection connection) {
 		this.playerID = playerID;
 		this.isBot = isBot;
@@ -33,7 +35,39 @@ public class Player {
 		this.hand = new ArrayList<>();
 		this.greenApples = new ArrayList<>();
 	}
+	*/
 
+	// Constructor for offline and bot players
+	public Player(int playerID, ArrayList<Card> initialHand, boolean isBot) {
+		this.playerID = playerID;
+		this.hand = new ArrayList<>(initialHand);
+		this.greenApples = new ArrayList<>();
+
+		// Select appropriate strategy
+		if (isBot) {
+			this.strategy = new BotPlayerStrategy();
+		} else {
+			this.strategy = new OfflinePlayerStrategy();
+		}
+		this.strategy.setHand(new ArrayList<>(this.hand));
+	}
+
+	// Constructor for online players
+	public Player(int playerID, boolean isBot, PlayerConnection connection) {
+		this.playerID = playerID;
+		this.connection = connection;
+		this.hand = new ArrayList<>();
+		this.greenApples = new ArrayList<>();
+
+		if (isBot) {
+			this.strategy = new BotPlayerStrategy();
+		} else {
+			this.strategy = new OnlinePlayerStrategy(connection);
+		}
+		this.strategy.setHand(this.hand);
+	}
+
+	/* 
 	public void play(ArrayList<PlayedApple> playedApples) {
 		if (isBot) {
 			// introduce synchronized to fix the race condition, causing the original bug
@@ -59,7 +93,7 @@ public class Player {
 				System.out.println("[" + i + "]   " + hand.get(i).getText());
 			}
 			System.out.println("");
-
+	
 			int choice = 0;
 			try {
 				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -78,49 +112,38 @@ public class Player {
 			System.out.println("Waiting for other players\n");
 		}
 	}
+	*/
+	public void play(ArrayList<PlayedApple> playedApples) {
+		strategy.play(playedApples, playerID);
+	}
 
 	public PlayedApple judge(ArrayList<PlayedApple> playedApples) {
-		if (isBot) {
-			return playedApples.get(0);
-		} else if (online) {
-			int playedAppleIndex = 0;
-			try {
-				playedAppleIndex = Integer.parseInt(connection.getInput().readLine());
-			} catch (Exception e) {
-			}
-			return playedApples.get(playedAppleIndex);
-		} else {
-			System.out.println("Choose which red apple wins\n");
-			int choice = 0;
-			try {
-				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-				String input = br.readLine();
-				choice = Integer.parseInt(input);
-			} catch (NumberFormatException e) {
-				System.out.println("That is not a valid option");
-				judge(playedApples);
-			} catch (Exception e) {
-			}
-			return playedApples.get(choice);
-		}
+		return strategy.judge(playedApples);
 	}
 
-	public void addCard(Card redApple) {
-		if (isBot || !online) {
-			hand.add(redApple);
-		} else {
-			try {
-				connection.writeMessage(redApple.toString());
-			} catch (Exception e) {
-			}
-		}
+	public void addCard(Card card) {
+		hand.add(card); // Keep local hand in sync
+		strategy.addCard(card);
 	}
 
-	public List<Card> getGreenApples() {
+	// Used by GameManager to manage win condition
+	public ArrayList<Card> getGreenApples() {
 		return greenApples;
 	}
 
-	public ClientOutput getOutToClient() {
+	/**
+	 * I AM UNSURE IF THIS IS EVER USED???
+	 * 
+	* Adds a green apple card to player's won cards collection.
+	* Called when this player's red apple is chosen by the judge.
+	*/
+	/*
+	public void addGreenApple(Card greenApple) {
+		greenApples.add(greenApple);
+	}
+		 */
+
+	public IClientOutput getOutToClient() {
 		return connection;
 	}
 }
