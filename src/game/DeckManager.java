@@ -1,43 +1,25 @@
 package src.game;
 
-import java.nio.charset.Charset;
-import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-
 import src.cards.Card;
-import src.cards.factory.AdjectiveCardFactory;
-import src.cards.factory.ICardFactory;
-import src.cards.factory.NounCardFactory;
 
 public class DeckManager {
 	private ArrayList<Card> redApples;
 	private ArrayList<Card> greenApples;
-	private ICardFactory nounCardFactory;
-	private ICardFactory adjectiveCardFactory;
+	private IDeckLoader deckLoader;
 
-	public DeckManager() throws Exception {
+	public DeckManager(IDeckLoader deckLoader) throws Exception {
+		this.deckLoader = deckLoader;
 		this.redApples = new ArrayList<>();
 		this.greenApples = new ArrayList<>();
-		this.nounCardFactory = new NounCardFactory();
-		this.adjectiveCardFactory = new AdjectiveCardFactory();
-		loadCards();
+		initializeDecks();
 		shuffleDecks();
 	}
 
-	private void loadCards() throws Exception {
-		List<String> redAppleTexts = Files.readAllLines(
-				Paths.get(Constants.RED_APPLES_PATH),
-				Charset.forName(Constants.CHARSET));
-		List<String> greenAppleTexts = Files.readAllLines(
-				Paths.get(Constants.GREEN_APPLES_PATH),
-				Charset.forName(Constants.CHARSET));
-		for (String text : redAppleTexts) {
-			redApples.add(nounCardFactory.createCard(text));
-		}
-		for (String text : greenAppleTexts) {
-			greenApples.add(adjectiveCardFactory.createCard(text));
-		}
+	private void initializeDecks() {
+		this.redApples = deckLoader.loadRedApples();
+		this.greenApples = deckLoader.loadGreenApples();
 	}
 
 	private void shuffleDecks() {
