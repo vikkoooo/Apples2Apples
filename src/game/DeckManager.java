@@ -1,16 +1,17 @@
 package src.game;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import src.cards.Card;
 
 public class DeckManager {
 	private ArrayList<Card> redApples;
 	private ArrayList<Card> greenApples;
 	private IDeckLoader deckLoader;
+	private IShuffler shuffler;
 
-	public DeckManager(IDeckLoader deckLoader) throws Exception {
+	public DeckManager(IDeckLoader deckLoader, IShuffler shuffler) throws Exception {
 		this.deckLoader = deckLoader;
+		this.shuffler = shuffler;
 		this.redApples = new ArrayList<>();
 		this.greenApples = new ArrayList<>();
 		initializeDecks();
@@ -23,9 +24,8 @@ public class DeckManager {
 	}
 
 	private void shuffleDecks() {
-		Random rnd = ThreadLocalRandom.current();
-		Collections.shuffle(redApples, rnd);
-		Collections.shuffle(greenApples, rnd);
+		shuffler.shuffle(redApples);
+		shuffler.shuffle(greenApples);
 	}
 
 	public Card drawRedApple() {

@@ -12,6 +12,7 @@ import src.player.Player;
 public class GameManager {
 	private ArrayList<Player> players;
 	private IDeckLoader deckLoader;
+	private IShuffler shuffler;
 	private DeckManager deckManager;
 	private NetworkManager networkManager;
 	private int judge;
@@ -20,7 +21,8 @@ public class GameManager {
 	public GameManager(int numberOfOnlinePlayers) throws Exception {
 		this.players = new ArrayList<>();
 		this.deckLoader = new DeckLoader();
-		this.deckManager = new DeckManager(deckLoader);
+		this.shuffler = new Shuffler();
+		this.deckManager = new DeckManager(deckLoader, shuffler);
 		this.networkManager = new NetworkManager();
 		this.playedApples = new ArrayList<>();
 		setupPlayers(numberOfOnlinePlayers);
