@@ -12,14 +12,13 @@ import src.player.Player;
 public class GameManager {
 	//private ArrayList<Player> players;
 	private IPlayerManager playerManager;
-	private IDeckLoader deckLoader;
-	private IShuffler shuffler;
 	private IGameRules gameRules;
 	private DeckManager deckManager;
 	private NetworkManager networkManager;
 	//private int judge;
 	private ArrayList<PlayedApple> playedApples;
 
+	/* 
 	public GameManager(int numberOfOnlinePlayers) throws Exception {
 		//this.players = new ArrayList<>();
 		this.playerManager = new PlayerManager();
@@ -31,8 +30,19 @@ public class GameManager {
 		this.playedApples = new ArrayList<>();
 		setupPlayers(numberOfOnlinePlayers);
 	}
+	*/
 
-	private void setupPlayers(int numberOfOnlinePlayers) throws Exception {
+	// Constructor with dependency injection
+	public GameManager(DeckManager deckManager, IPlayerManager playerManager, IGameRules gameRules,
+			NetworkManager networkManager) throws Exception {
+		this.deckManager = deckManager;
+		this.playerManager = playerManager;
+		this.gameRules = gameRules;
+		this.networkManager = networkManager;
+		this.playedApples = new ArrayList<>();
+	}
+
+	public void setupPlayers(int numberOfOnlinePlayers) throws Exception {
 		// Connect online players
 		for (int i = 0; i < numberOfOnlinePlayers; i++) {
 			Player player = networkManager.acceptConnection(i);
