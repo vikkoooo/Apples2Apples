@@ -13,6 +13,7 @@ public class GameManager {
 	private ArrayList<Player> players;
 	private IDeckLoader deckLoader;
 	private IShuffler shuffler;
+	private IGameRules gameRules;
 	private DeckManager deckManager;
 	private NetworkManager networkManager;
 	private int judge;
@@ -22,6 +23,7 @@ public class GameManager {
 		this.players = new ArrayList<>();
 		this.deckLoader = new DeckLoader();
 		this.shuffler = new Shuffler();
+		this.gameRules = new GameRules();
 		this.deckManager = new DeckManager(deckLoader, shuffler);
 		this.networkManager = new NetworkManager();
 		this.playedApples = new ArrayList<>();
@@ -106,12 +108,6 @@ public class GameManager {
 	}
 
 	private boolean checkWinCondition() {
-		for (Player player : players) {
-			if (player.getGreenApples().size() >= Constants.WIN_CONDITION) {
-				System.out.println("Player ID " + player.getGreenApples().size() + " won the game!");
-				return true;
-			}
-		}
-		return false;
+		return gameRules.isGameOver(players);
 	}
 }
