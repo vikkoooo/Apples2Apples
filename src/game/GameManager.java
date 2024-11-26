@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 
 import src.cards.Card;
 import src.cards.PlayedApple;
-import src.network.NetworkManager;
+import src.network.INetworkManager;
 import src.player.Player;
 
 public class GameManager {
 	//private ArrayList<Player> players;
+	private DeckManager deckManager;
 	private IPlayerManager playerManager;
 	private IGameRules gameRules;
-	private DeckManager deckManager;
-	private NetworkManager networkManager;
+	private INetworkManager networkManager;
 	//private int judge;
 	private ArrayList<PlayedApple> playedApples;
 
@@ -34,7 +34,7 @@ public class GameManager {
 
 	// Constructor with dependency injection
 	public GameManager(DeckManager deckManager, IPlayerManager playerManager, IGameRules gameRules,
-			NetworkManager networkManager) throws Exception {
+			INetworkManager networkManager) throws Exception {
 		this.deckManager = deckManager;
 		this.playerManager = playerManager;
 		this.gameRules = gameRules;

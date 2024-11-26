@@ -5,7 +5,7 @@ import java.net.*;
 import src.game.Constants;
 import src.player.Player;
 
-public class NetworkManager {
+public class NetworkManager implements INetworkManager {
 	private ServerSocket serverSocket;
 
 	public NetworkManager() throws Exception {
