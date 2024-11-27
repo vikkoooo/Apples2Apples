@@ -64,4 +64,17 @@ public class Player {
 	public IClientOutput getOutToClient() {
 		return connection;
 	}
+
+	// Getter methods
+	public int getPlayerID() {
+		return playerID;
+	}
+
+	public ArrayList<Card> getHand() {
+		return hand;
+	}
+
+	public IPlayerStrategy getStrategy() {
+		return strategy;
+	}
 }
