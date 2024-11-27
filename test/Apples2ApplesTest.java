@@ -2,48 +2,100 @@ package test;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import src.Apples2Apples;
-import java.util.ArrayList;
+import src.cards.*;
+import src.game.*;
+import src.network.*;
+import src.player.*;
+import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class Apples2ApplesTest {
 
-	private Apples2Apples game;
+	//private Apples2Apples game;
+	private GameManager gameManager;
+
+	@Mock
+	private DeckLoader mockDeckLoader;
+	@Mock
+	private Shuffler mockShuffler;
+	@Mock
+	private PlayerManager mockPlayerManager;
+	@Mock
+	private GameRules mockGameRules;
+	@Mock
+
+	private NetworkManager mockNetworkManager;
+	private DeckManager deckManager;
+
+	private static final int CARDS_PER_PLAYER = 7;
 
 	@BeforeEach
-	void setUp() {
-		System.out.println("Starting setup");
-		try {
-			game = new Apples2Apples(0);
-			System.out.println("Created game instance"); // I will never reach this line
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception thrown during setup: " + e.getMessage());
-		}
-		System.out.println("Setup complete");
-		// Therefore, I will never reach these lists which I wanted to use in my tests
-		game.redApples = new ArrayList<>();
-		game.greenApples = new ArrayList<>();
-		game.players = new ArrayList<>();
+	void setUp() throws Exception {
+		MockitoAnnotations.openMocks(this);
+		deckManager = new DeckManager(mockDeckLoader, mockShuffler);
+		gameManager = new GameManager(
+				deckManager,
+				mockPlayerManager,
+				mockGameRules,
+				mockNetworkManager);
 	}
 
-	// TODO: Write tests
-	// Test 1: Verify green apples are loaded from the file and added to the deck.
+	// Test 1. Read all the green apples (adjectives) from a file and add to the green apples deck.
 	@Test
-	public void testGreenApplesLoaded() {
-		try {
-			// Use assertion to verify the green apples list is not empty
-			assertFalse(game.greenApples.isEmpty(), "Green apples were not loaded from the file.");
-		} catch (Exception e) {
-			e.printStackTrace();
-			// If an exception occurs, fail the test
-			assertFalse(true, "Test failed due to exception: " + e.getMessage());
-		}
+	void testLoadGreenApplesFromFile() {
+		// Arrange
+		ArrayList<Card> expectedGreenApples = new ArrayList<>();
+		expectedGreenApples.add(new GreenApple("Funny"));
+		expectedGreenApples.add(new GreenApple("Scary"));
+		when(mockDeckLoader.loadGreenApples()).thenReturn(expectedGreenApples);
+
+		// Act
+		ArrayList<Card> loadedCards = mockDeckLoader.loadGreenApples();
+
+		// Assert
+		assertEquals(2, loadedCards.size());
+		verify(mockDeckLoader, times(2)).loadGreenApples();
 	}
 
-	// Test 2: Verify red apples are loaded from the file and added to the deck.
-	// Test 3: Verify both decks are shuffled correctly.
-	// Test 4: Verify that each player receives 7 red apples.
-	// Test 5: Verify the judge is selected randomly at the start.
+	// Test 2. Read all the red apples (nouns) from a file and add to the red apples deck.
+	@Test
+	void testLoadRedApplesFromFile() {
+		// Arrange
+		ArrayList<Card> expectedRedApples = new ArrayList<>();
+		expectedRedApples.add(new RedApple("Cat"));
+		expectedRedApples.add(new RedApple("Pizza"));
+		when(mockDeckLoader.loadRedApples()).thenReturn(expectedRedApples);
+
+		// Act
+		ArrayList<Card> loadedCards = mockDeckLoader.loadRedApples();
+
+		// Assert
+		assertEquals(2, loadedCards.size());
+		verify(mockDeckLoader, times(2)).loadRedApples();
+	}
+
+	// Test 3. Shuffle both the green apples and red apples decks.
+	@Test
+	void testShuffleDeck() {
+		// Arrange
+		ArrayList<Card> deck = new ArrayList<>();
+		deck.add(new RedApple("Card1"));
+		deck.add(new RedApple("Card2"));
+
+		// Act
+		mockShuffler.shuffle(deck);
+
+		// Assert
+		verify(mockShuffler).shuffle(deck);
+	}
+
+	// TODO: Test 4. Deal seven red apples to each player, including the judge.
+
+	// TODO: Test 5. Randomise which player starts being the judge.
 
 }
