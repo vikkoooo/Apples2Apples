@@ -49,4 +49,12 @@ public class DeckManager {
 		}
 		return hand;
 	}
+
+	public ArrayList<Card> getRedApples() {
+		return new ArrayList<>(redApples);
+	}
+
+	public ArrayList<Card> getGreenApples() {
+		return new ArrayList<>(greenApples);
+	}
 }

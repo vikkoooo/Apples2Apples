@@ -9,11 +9,12 @@ import src.game.*;
 import src.network.*;
 import src.player.*;
 
+import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -69,38 +70,54 @@ class Apples2ApplesTest {
 
 	// Test 1. Read all the green apples (adjectives) from a file and add to the green apples deck.
 	@Test
-	void testLoadGreenApplesFromFile() {
+	void testLoadGreenApples() throws Exception {
 		// Arrange
-		ArrayList<Card> expectedGreenApples = new ArrayList<>();
-		expectedGreenApples.add(new GreenApple("Funny"));
-		expectedGreenApples.add(new GreenApple("Scary"));
-		when(mockDeckLoader.loadGreenApples()).thenReturn(expectedGreenApples);
+		DeckManager realDeckManager = new DeckManager(new DeckLoader(), new Shuffler());
+		File file = new File("src/cards/data/greenApples.txt");
+		long expectedSize = Files.lines(file.toPath()).count();
 
 		// Act
-		ArrayList<Card> actualGreenApples = mockDeckLoader.loadGreenApples();
+		ArrayList<Card> greenApples = realDeckManager.getGreenApples();
+
+		System.out.println(greenApples.toString());
+		System.out.println(greenApples.size());
+		assertFalse(greenApples.isEmpty(), "Green apple deck should not be empty after loading.");
+		assertTrue(greenApples.stream().allMatch(card -> card instanceof GreenApple),
+				"All cards should be green apples.");
 
 		// Assert
-		assertEquals(expectedGreenApples.size(), actualGreenApples.size());
-		assertTrue(actualGreenApples.containsAll(expectedGreenApples));
-		verify(mockDeckLoader, times(2)).loadGreenApples();
+		assertEquals(expectedSize, greenApples.size());
+		for (Card card : greenApples) {
+			assertNotNull(card);
+			assertNotNull(card.toString());
+			assertFalse(card.toString().isEmpty());
+		}
 	}
 
 	// Test 2. Read all the red apples (nouns) from a file and add to the red apples deck.
 	@Test
-	void testLoadRedApplesFromFile() {
+	void testLoadRedApples() throws Exception {
 		// Arrange
-		ArrayList<Card> expectedRedApples = new ArrayList<>();
-		expectedRedApples.add(new RedApple("Cat"));
-		expectedRedApples.add(new RedApple("Pizza"));
-		when(mockDeckLoader.loadRedApples()).thenReturn(expectedRedApples);
+		DeckManager realDeckManager = new DeckManager(new DeckLoader(), new Shuffler());
+		File file = new File("src/cards/data/redApples.txt");
+		long expectedSize = Files.lines(file.toPath()).count();
 
 		// Act
-		ArrayList<Card> actualRedApples = mockDeckLoader.loadRedApples();
+		ArrayList<Card> redApples = realDeckManager.getRedApples();
+
+		System.out.println(redApples.toString());
+		System.out.println(redApples.size());
+		assertFalse(redApples.isEmpty(), "Red apple deck should not be empty after loading.");
+		assertTrue(redApples.stream().allMatch(card -> card instanceof RedApple),
+				"All cards should be red apples.");
 
 		// Assert
-		assertEquals(expectedRedApples.size(), actualRedApples.size());
-		assertTrue(actualRedApples.containsAll(expectedRedApples));
-		verify(mockDeckLoader, times(2)).loadRedApples();
+		assertEquals(expectedSize, redApples.size());
+		for (Card card : redApples) {
+			assertNotNull(card);
+			assertNotNull(card.toString());
+			assertFalse(card.toString().isEmpty());
+		}
 	}
 
 	// Test 3. Shuffle both the green apples and red apples decks.
