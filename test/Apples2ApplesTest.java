@@ -40,11 +40,16 @@ class Apples2ApplesTest {
 		// Prepare mock data for extended tests
 		ArrayList<Card> redApples = new ArrayList<>();
 		for (int i = 1; i <= 30; i++) {
-			redApples.add(new RedApple("Card" + i));
+			redApples.add(new RedApple("RedCard" + i));
+		}
+
+		ArrayList<Card> greenApples = new ArrayList<>();
+		for (int i = 1; i <= 10; i++) {
+			greenApples.add(new GreenApple("GreenCard" + i));
 		}
 
 		when(mockDeckLoader.loadRedApples()).thenReturn(redApples);
-		when(mockDeckLoader.loadGreenApples()).thenReturn(new ArrayList<>());
+		when(mockDeckLoader.loadGreenApples()).thenReturn(greenApples);
 
 		// Initialize deck manager and other components
 		deckManager = new DeckManager(mockDeckLoader, mockShuffler);
@@ -180,4 +185,70 @@ class Apples2ApplesTest {
 		assertTrue(judgeIds.contains(player2.getPlayerID()), "Player 2 should have been the judge at least once.");
 		assertTrue(judgeIds.contains(player3.getPlayerID()), "Player 3 should have been the judge at least once.");
 	}
+
+	// Test 6. A green apple is drawn from the pile and shown to everyone
+	@Test
+	public void testDrawGreenApple() {
+		// Act
+		Card greenApple = deckManager.drawGreenApple();
+
+		// Assert
+		assertNotNull(greenApple, "A green apple should be drawn from the pile.");
+	}
+
+	// Test 7. All players (except the judge) choose one red apple from their hand (based on the green apple) and plays it.
+	@Test
+	public void testPlayersPlayRedApple() {
+		// Arrange
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player judge = new Player(3, new ArrayList<>(), false);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(judge);
+
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+
+		PlayerManager playerManager = new PlayerManager();
+		playerManager.addPlayer(player1);
+		playerManager.addPlayer(player2);
+		playerManager.addPlayer(judge);
+		playerManager.initializeJudgeIndex();
+
+		ArrayList<Card> playedCards = new ArrayList<>();
+
+		// Act
+		for (Player player : players) {
+			if (player != playerManager.getJudge()) {
+				Card playedCard = player.getHand().remove(0); // Assume players play the first card in their hand
+				playedCards.add(playedCard);
+			}
+		}
+
+		// Assert
+		assertEquals(2, playedCards.size(), "Two players should have played their red apples.");
+		for (Player player : players) {
+			if (player != playerManager.getJudge()) {
+				assertEquals(6, player.getHand().size(),
+						"Each player (except the judge) should have 6 cards in hand after playing one.");
+			}
+		}
+	}
+
+	// TODO: Test 8. The printed order of the played red apples should be randomised before shown to everyone.
+
+	// TODO: Test 9. All players (except the judge) must play their red apples before the results are shown.
+
+	// TODO: Test 10. The judge selects a favourite red apple. The player who submitted the favourite red apple is rewarded the green apple as a point (rule 14).
+
+	// TODO: Test 11. All the submitted red apples are discarded
+
+	// TODO: Test 12. All players are given new red apples until they have 7 red apples
+
+	// TODO: Test 13. The next player in the list becomes the judge. Repeat from step 6 until someone wins the game.
 }
