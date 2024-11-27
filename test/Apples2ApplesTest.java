@@ -367,7 +367,78 @@ class Apples2ApplesTest {
 		return (IPlayerStrategy) strategyField.get(player);
 	}
 
-	// TODO: Test 10. The judge selects a favourite red apple. The player who submitted the favourite red apple is rewarded the green apple as a point (rule 14).
+	// Test 10. The judge selects a favourite red apple. The player who submitted the favourite red apple is rewarded the green apple as a point (rule 14).
+	@Test
+	public void testJudgeSelectsWinnerAndAwardsGreenApple() throws Exception {
+		// Arrange
+		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
+
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		setPlayerStrategy(player1, mockStrategy1);
+		setPlayerStrategy(player2, mockStrategy2);
+		setPlayerStrategy(player3, mockJudgeStrategy);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(player3);
+
+		// Deal red apples to players
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+
+		PlayerManager playerManager = new PlayerManager();
+		playerManager.addPlayer(player1);
+		playerManager.addPlayer(player2);
+		playerManager.addPlayer(player3);
+		playerManager.initializeJudgeIndex();
+
+		// Draw green apple for the round
+		Card greenApple = deckManager.drawGreenApple();
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+
+		// Get selected judge from PlayerManager
+		Player judge = playerManager.getJudge();
+
+		// Set up mock for the actual judge's strategy
+		PlayedApple winningCard = new PlayedApple(player1.getPlayerID(), player1.getHand().get(0));
+		when(mockJudgeStrategy.judge(any(ArrayList.class))).thenReturn(winningCard);
+		setPlayerStrategy(judge, mockJudgeStrategy); // Set strategy for actual judge
+
+		// Act
+		// Players play their cards
+		for (Player player : players) {
+			if (!player.equals(judge)) { // Use stored judge reference
+				player.play(playedApples);
+			}
+		}
+
+		// Judge selects winning card
+		PlayedApple selectedCard = judge.judge(playedApples); // Use stored judge reference
+
+		// Verify selected card is not null
+		assertNotNull(selectedCard, "Judge must select a card");
+
+		// Award green apple to winner
+		Player winner = players.stream()
+				.filter(p -> p.getPlayerID() == selectedCard.playerID)
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("Winner not found"));
+
+		winner.getGreenApples().add(greenApple);
+
+		// Assert
+		assertEquals(1, winner.getGreenApples().size(), "Winner should receive one green apple");
+		assertEquals(greenApple, winner.getGreenApples().get(0), "Winner should receive the correct green apple");
+		verify(mockJudgeStrategy, times(1)).judge(any(ArrayList.class));
+	}
 
 	// TODO: Test 11. All the submitted red apples are discarded
 
