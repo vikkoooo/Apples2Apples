@@ -4,40 +4,52 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import src.Apples2Apples;
 import src.cards.*;
 import src.game.*;
 import src.network.*;
 import src.player.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class Apples2ApplesTest {
-
-	//private Apples2Apples game;
 	private GameManager gameManager;
+	private DeckManager deckManager;
 
+	// Declare mocks
 	@Mock
-	private DeckLoader mockDeckLoader;
+	private IDeckLoader mockDeckLoader;
 	@Mock
-	private Shuffler mockShuffler;
+	private IShuffler mockShuffler;
 	@Mock
 	private PlayerManager mockPlayerManager;
 	@Mock
 	private GameRules mockGameRules;
 	@Mock
-
 	private NetworkManager mockNetworkManager;
-	private DeckManager deckManager;
-
-	private static final int CARDS_PER_PLAYER = 7;
+	@Mock
+	private PlayerConnection mockConnection;
 
 	@BeforeEach
-	void setUp() throws Exception {
+	public void setUp() throws Exception {
+		// Initialize mocks
 		MockitoAnnotations.openMocks(this);
+		mockDeckLoader = mock(IDeckLoader.class);
+		mockShuffler = mock(IShuffler.class);
+
+		// Prepare mock data for extended tests
+		ArrayList<Card> redApples = new ArrayList<>();
+		for (int i = 1; i <= 30; i++) {
+			redApples.add(new RedApple("Card" + i));
+		}
+
+		when(mockDeckLoader.loadRedApples()).thenReturn(redApples);
+		when(mockDeckLoader.loadGreenApples()).thenReturn(new ArrayList<>());
+
+		// Initialize deck manager and other components
 		deckManager = new DeckManager(mockDeckLoader, mockShuffler);
+
+		// Initialize game manager with its dependencies
 		gameManager = new GameManager(
 				deckManager,
 				mockPlayerManager,
@@ -117,8 +129,55 @@ class Apples2ApplesTest {
 		assertNotEquals(originalGreenDeck, greenDeck, "Green deck order should be different after shuffle.");
 	}
 
-	// TODO: Test 4. Deal seven red apples to each player, including the judge.
+	// Test 4. Deal seven red apples to each player, including the judge.
+	@Test
+	public void testDealSevenRedApplesToEachPlayer() {
+		// Arrange
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player judge = new Player(3, new ArrayList<>(), false);
 
-	// TODO: Test 5. Randomise which player starts being the judge.
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(judge);
 
+		// Act
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+
+		// Assert
+		for (Player player : players) {
+			assertEquals(7, player.getHand().size(), "Each player should have 7 cards in hand.");
+		}
+	}
+
+	// Test 5. Randomise which player starts being the judge.
+	@Test
+	public void testRandomizeWhichPlayerStartsBeingTheJudge() {
+		// Arrange
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		PlayerManager playerManager = new PlayerManager();
+		playerManager.addPlayer(player1);
+		playerManager.addPlayer(player2);
+		playerManager.addPlayer(player3);
+
+		Set<Integer> judgeIds = new HashSet<>();
+
+		// Act
+		for (int i = 0; i < 100; i++) {
+			playerManager.initializeJudgeIndex();
+			judgeIds.add(playerManager.getJudge().getPlayerID());
+		}
+
+		// Assert
+		assertTrue(judgeIds.contains(player1.getPlayerID()), "Player 1 should have been the judge at least once.");
+		assertTrue(judgeIds.contains(player2.getPlayerID()), "Player 2 should have been the judge at least once.");
+		assertTrue(judgeIds.contains(player3.getPlayerID()), "Player 3 should have been the judge at least once.");
+	}
 }
