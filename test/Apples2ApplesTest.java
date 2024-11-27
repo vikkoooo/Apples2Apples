@@ -55,10 +55,11 @@ class Apples2ApplesTest {
 		when(mockDeckLoader.loadGreenApples()).thenReturn(expectedGreenApples);
 
 		// Act
-		ArrayList<Card> loadedCards = mockDeckLoader.loadGreenApples();
+		ArrayList<Card> actualGreenApples = mockDeckLoader.loadGreenApples();
 
 		// Assert
-		assertEquals(2, loadedCards.size());
+		assertEquals(expectedGreenApples.size(), actualGreenApples.size());
+		assertTrue(actualGreenApples.containsAll(expectedGreenApples));
 		verify(mockDeckLoader, times(2)).loadGreenApples();
 	}
 
@@ -72,26 +73,48 @@ class Apples2ApplesTest {
 		when(mockDeckLoader.loadRedApples()).thenReturn(expectedRedApples);
 
 		// Act
-		ArrayList<Card> loadedCards = mockDeckLoader.loadRedApples();
+		ArrayList<Card> actualRedApples = mockDeckLoader.loadRedApples();
 
 		// Assert
-		assertEquals(2, loadedCards.size());
+		assertEquals(expectedRedApples.size(), actualRedApples.size());
+		assertTrue(actualRedApples.containsAll(expectedRedApples));
 		verify(mockDeckLoader, times(2)).loadRedApples();
 	}
 
 	// Test 3. Shuffle both the green apples and red apples decks.
 	@Test
-	void testShuffleDeck() {
+	void testShuffleDecks() {
 		// Arrange
-		ArrayList<Card> deck = new ArrayList<>();
-		deck.add(new RedApple("Card1"));
-		deck.add(new RedApple("Card2"));
+		Shuffler realShuffler = new Shuffler();
+
+		// Red deck setup
+		ArrayList<Card> redDeck = new ArrayList<>();
+		redDeck.add(new RedApple("Card1"));
+		redDeck.add(new RedApple("Card2"));
+		redDeck.add(new RedApple("Card3"));
+		redDeck.add(new RedApple("Card4"));
+		redDeck.add(new RedApple("Card5"));
+		redDeck.add(new RedApple("Card6"));
+		ArrayList<Card> originalRedDeck = new ArrayList<>(redDeck);
+
+		// Green deck setup
+		ArrayList<Card> greenDeck = new ArrayList<>();
+		greenDeck.add(new GreenApple("Funny"));
+		greenDeck.add(new GreenApple("Scary"));
+		greenDeck.add(new GreenApple("Serious"));
+		greenDeck.add(new GreenApple("Exciting"));
+		greenDeck.add(new GreenApple("Boring"));
+		ArrayList<Card> originalGreenDeck = new ArrayList<>(greenDeck);
 
 		// Act
-		mockShuffler.shuffle(deck);
+		realShuffler.shuffle(redDeck);
+		realShuffler.shuffle(greenDeck);
 
 		// Assert
-		verify(mockShuffler).shuffle(deck);
+		// Verify the red deck has been shuffled
+		assertNotEquals(originalRedDeck, redDeck, "Red deck order should be different after shuffle.");
+		// Verify the green deck has been shuffled
+		assertNotEquals(originalGreenDeck, greenDeck, "Green deck order should be different after shuffle.");
 	}
 
 	// TODO: Test 4. Deal seven red apples to each player, including the judge.
