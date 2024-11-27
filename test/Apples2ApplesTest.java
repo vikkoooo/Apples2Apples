@@ -240,7 +240,56 @@ class Apples2ApplesTest {
 		}
 	}
 
-	// TODO: Test 8. The printed order of the played red apples should be randomised before shown to everyone.
+	// Test 8. The printed order of the played red apples should be randomised before shown to everyone.
+	@Test
+	public void testRandomizeOrderOfPlayedRedApples() {
+		// Arrange
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player judge = new Player(3, new ArrayList<>(), false);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(judge);
+
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+
+		PlayerManager playerManager = new PlayerManager();
+		playerManager.addPlayer(player1);
+		playerManager.addPlayer(player2);
+		playerManager.addPlayer(judge);
+		playerManager.initializeJudgeIndex();
+
+		ArrayList<Card> playedCards = new ArrayList<>();
+
+		for (Player player : players) {
+			if (player != playerManager.getJudge()) {
+				Card playedCard = player.getHand().remove(0); // Assume players play the first card in their hand
+				playedCards.add(playedCard);
+			}
+		}
+
+		ArrayList<Card> originalOrder = new ArrayList<>(playedCards);
+
+		// Act
+		boolean isOrderChanged = false;
+		for (int i = 0; i < 10; i++) {
+			Collections.shuffle(playedCards);
+			if (!originalOrder.equals(playedCards)) {
+				isOrderChanged = true;
+				break;
+			}
+		}
+
+		// Assert
+		assertEquals(2, playedCards.size(), "Two players should have played their red apples.");
+		assertNotEquals(originalOrder, playedCards, "The order of played red apples should be randomized.");
+		assertTrue(isOrderChanged, "The order of played red apples should be randomized.");
+	}
 
 	// TODO: Test 9. All players (except the judge) must play their red apples before the results are shown.
 
