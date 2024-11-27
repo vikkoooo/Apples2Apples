@@ -8,8 +8,13 @@ import src.cards.*;
 import src.game.*;
 import src.network.*;
 import src.player.*;
+
+import java.lang.reflect.Field;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class Apples2ApplesTest {
@@ -291,7 +296,76 @@ class Apples2ApplesTest {
 		assertTrue(isOrderChanged, "The order of played red apples should be randomized.");
 	}
 
-	// TODO: Test 9. All players (except the judge) must play their red apples before the results are shown.
+	// Test 9. All players (except the judge) must play their red apples before the results are shown.
+	@Test
+	public void testAllPlayersPlayRedApplesBeforeResults() throws Exception {
+		// Arrange
+		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockStrategyJudge = mock(IPlayerStrategy.class);
+
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		// Use reflection to set the strategy field
+		setPlayerStrategy(player1, mockStrategy1);
+		setPlayerStrategy(player2, mockStrategy2);
+		setPlayerStrategy(player3, mockStrategyJudge);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(player3);
+
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+
+		PlayerManager playerManager = new PlayerManager();
+		playerManager.addPlayer(player1);
+		playerManager.addPlayer(player2);
+		playerManager.addPlayer(player3);
+		playerManager.initializeJudgeIndex();
+
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+
+		// Act
+		for (Player player : players) {
+			if (!player.equals(playerManager.getJudge())) { // Changed comparison to equals()
+				player.play(playedApples);
+			}
+		}
+
+		// Assert
+		Player judge = playerManager.getJudge();
+
+		// Verify non-judge players played their cards
+		for (Player player : players) {
+			if (player.equals(judge)) {
+				verify(getPlayerStrategy(player), times(0))
+						.play(any(ArrayList.class), eq(player.getPlayerID()));
+			} else {
+				verify(getPlayerStrategy(player), times(1))
+						.play(any(ArrayList.class), eq(player.getPlayerID()));
+			}
+		}
+	}
+
+	// Helper function to Test 9
+	private void setPlayerStrategy(Player player, IPlayerStrategy strategy) throws Exception {
+		Field strategyField = Player.class.getDeclaredField("strategy");
+		strategyField.setAccessible(true);
+		strategyField.set(player, strategy);
+	}
+
+	// Helper function to Test 9
+	private IPlayerStrategy getPlayerStrategy(Player player) throws Exception {
+		Field strategyField = Player.class.getDeclaredField("strategy");
+		strategyField.setAccessible(true);
+		return (IPlayerStrategy) strategyField.get(player);
+	}
 
 	// TODO: Test 10. The judge selects a favourite red apple. The player who submitted the favourite red apple is rewarded the green apple as a point (rule 14).
 
