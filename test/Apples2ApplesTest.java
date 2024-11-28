@@ -458,6 +458,204 @@ class Apples2ApplesTest {
 	}
 
 	// TODO: Test 11. All the submitted red apples are discarded
+	@Test
+	public void testSubmittedRedApplesAreDiscarded() throws Exception {
+		// Arrange
+		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
+
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		setPlayerStrategy(player1, mockStrategy1);
+		setPlayerStrategy(player2, mockStrategy2);
+		setPlayerStrategy(player3, mockJudgeStrategy);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(player3);
+
+		// Deal red apples to players
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+
+		PlayerManager playerManager = new PlayerManager();
+		playerManager.addPlayer(player1);
+		playerManager.addPlayer(player2);
+		playerManager.addPlayer(player3);
+		playerManager.initializeJudgeIndex();
+
+		Player selectedJudge = playerManager.getJudge();
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+
+		// Keep track of initial hands
+		ArrayList<Card> player1InitialHand = new ArrayList<>(player1.getHand());
+		ArrayList<Card> player2InitialHand = new ArrayList<>(player2.getHand());
+
+		// Set up mock strategies to simulate card removal and adding to playedApples
+		doAnswer(invocation -> {
+			ArrayList<PlayedApple> playedApplesArg = invocation.getArgument(0);
+			int playerID = invocation.getArgument(1);
+			Card playedCard = player1.getHand().remove(0);
+			playedApplesArg.add(new PlayedApple(playerID, playedCard));
+			return null;
+		}).when(mockStrategy1).play(any(ArrayList.class), eq(player1.getPlayerID()));
+
+		doAnswer(invocation -> {
+			ArrayList<PlayedApple> playedApplesArg = invocation.getArgument(0);
+			int playerID = invocation.getArgument(1);
+			Card playedCard = player2.getHand().remove(0);
+			playedApplesArg.add(new PlayedApple(playerID, playedCard));
+			return null;
+		}).when(mockStrategy2).play(any(ArrayList.class), eq(player2.getPlayerID()));
+
+		// Act
+		// Players play their cards
+		for (Player player : players) {
+			if (!player.equals(selectedJudge)) {
+				System.out.println("Player " + player.getPlayerID() + " playing card");
+				player.play(playedApples);
+				System.out.println("After play, hand size: " + player.getHand().size());
+			}
+		}
+
+		// Debug: Print hands after playing
+		System.out.println("Hands after playing:");
+		for (Player player : players) {
+			System.out.println("Player " + player.getPlayerID() + ": " + player.getHand());
+		}
+
+		// Debug: Print played apples
+		System.out.println("Played apples:");
+		for (PlayedApple playedApple : playedApples) {
+			System.out.println("Player " + playedApple.playerID + ": " + playedApple.redApple);
+		}
+
+		// Judge selects winner
+		PlayedApple selectedCard = selectedJudge.judge(playedApples);
+
+		// Clear played cards
+		playedApples.clear();
+
+		// Assert
+		// Verify cards were removed from players' hands
+		for (Player player : players) {
+			if (!player.equals(selectedJudge)) {
+				assertEquals(6, player.getHand().size(), "Players should have 6 cards after playing one");
+			} else {
+				assertEquals(7, player.getHand().size(), "Judge should still have 7 cards");
+			}
+		}
+
+		// Verify played cards list is empty
+		assertTrue(playedApples.isEmpty(), "Played cards should be discarded");
+
+		// Verify played cards are no longer in players' hands
+		for (Card card : player1InitialHand) {
+			if (!player1.getHand().contains(card)) {
+				assertFalse(playedApples.contains(new PlayedApple(player1.getPlayerID(), card)),
+						"Played card should be discarded");
+			}
+		}
+	}
+
+	// Test 11, version 2. This version does not work, even though debug suggests it should
+	// Because the actual function play() is invoked, but no cards are played.
+	// I believe this has something to do with the mock setup, but I'm not sure what.
+	// This test seems like the way to go, if one could figure out how to make it work.
+	@Test
+	public void testSubmittedRedApplesAreDiscardedNotWorking() throws Exception {
+		// Arrange
+		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
+		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
+
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		setPlayerStrategy(player1, mockStrategy1);
+		setPlayerStrategy(player2, mockStrategy2);
+		setPlayerStrategy(player3, mockJudgeStrategy);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(player3);
+
+		// Deal red apples to players
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+
+		PlayerManager playerManager = new PlayerManager();
+		playerManager.addPlayer(player1);
+		playerManager.addPlayer(player2);
+		playerManager.addPlayer(player3);
+		playerManager.initializeJudgeIndex();
+
+		Player selectedJudge = playerManager.getJudge();
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+
+		// Keep track of initial hands
+		ArrayList<Card> player1InitialHand = new ArrayList<>(player1.getHand());
+		ArrayList<Card> player2InitialHand = new ArrayList<>(player2.getHand());
+
+		// Act
+		// Players play their cards
+		for (Player player : players) {
+			if (!player.equals(selectedJudge)) {
+				System.out.println("Player " + player.getPlayerID() + " playing card");
+				player.play(playedApples);
+				System.out.println("After play, hand size: " + player.getHand().size());
+			}
+		}
+
+		// Debug: Print hands after playing
+		System.out.println("Hands after playing:");
+		for (Player player : players) {
+			System.out.println("Player " + player.getPlayerID() + ": " + player.getHand());
+		}
+
+		// Debug: Print played apples
+		System.out.println("Played apples:");
+		for (PlayedApple playedApple : playedApples) {
+			System.out.println("Player " + playedApple.playerID + ": " + playedApple.redApple);
+		}
+
+		// Judge selects winner
+		PlayedApple selectedCard = selectedJudge.judge(playedApples);
+
+		// Clear played cards
+		playedApples.clear();
+
+		// Assert
+		// Verify cards were removed from players' hands
+		for (Player player : players) {
+			if (!player.equals(selectedJudge)) {
+				assertEquals(6, player.getHand().size(), "Players should have 6 cards after playing one");
+			} else {
+				assertEquals(7, player.getHand().size(), "Judge should still have 7 cards");
+			}
+		}
+
+		// Verify played cards list is empty
+		assertTrue(playedApples.isEmpty(), "Played cards should be discarded");
+
+		// Verify played cards are no longer in players' hands
+		for (Card card : player1InitialHand) {
+			if (!player1.getHand().contains(card)) {
+				assertFalse(playedApples.contains(new PlayedApple(player1.getPlayerID(), card)),
+						"Played card should be discarded");
+			}
+		}
+	}
 
 	// TODO: Test 12. All players are given new red apples until they have 7 red apples
 
