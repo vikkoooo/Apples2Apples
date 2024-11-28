@@ -738,4 +738,68 @@ class Apples2ApplesTest {
 	}
 
 	// TODO: Test 13. The next player in the list becomes the judge. Repeat from step 6 until someone wins the game.
+	@Test
+	public void testJudgeRotationAndRestartGameplay() throws Exception {
+		// Arrange
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(player3);
+
+		// Deal initial red apples to players
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			player.getHand().addAll(initialHand);
+		}
+
+		// Use the real PlayerManager and GameManager
+		PlayerManager realPlayerManager = new PlayerManager();
+		realPlayerManager.addPlayer(player1);
+		realPlayerManager.addPlayer(player2);
+		realPlayerManager.addPlayer(player3);
+		realPlayerManager.initializeJudgeIndex();
+
+		GameManager realGameManager = new GameManager(deckManager, realPlayerManager, mockGameRules,
+				mockNetworkManager);
+
+		// Act
+		// Get the initial judge
+		Player initialJudge = realPlayerManager.getJudge();
+
+		// Rotate the judge
+		realPlayerManager.rotateJudge();
+
+		// Get the new judge
+		Player newJudge = realPlayerManager.getJudge();
+
+		// Assert
+		// Verify that the judge is rotated correctly
+		assertNotEquals(initialJudge, newJudge, "The judge should be rotated to the next player.");
+
+		// Verify that the gameplay can start again
+		// Simulate players playing cards
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+		for (Player player : realPlayerManager.getActivePlayers()) {
+			if (player != newJudge) {
+				Card playedCard = player.getHand().remove(0); // Remove first card
+				playedApples.add(new PlayedApple(player.getPlayerID(), playedCard));
+			}
+		}
+
+		// Simulate dealer replenishing cards
+		realGameManager.dealCards();
+
+		// Assert
+		for (Player player : realPlayerManager.getActivePlayers()) {
+			if (player != newJudge) {
+				assertEquals(7, player.getHand().size(),
+						"Each non-judge player should have their hand replenished after playing");
+			}
+		}
+	}
+
 }
