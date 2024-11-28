@@ -551,7 +551,7 @@ class Apples2ApplesTest {
 		assertTrue(playedApples.isEmpty(), "Played cards should be discarded");
 	}
 
-	// Test 11, version 2. This version does not work, even though debug suggests it should
+	// Test 11, version 2. This version does not work, even though debug suggests it should.
 	// Because the actual function play() is invoked, but no cards are played.
 	// I believe this has something to do with the mock setup, but I'm not sure what.
 	// This test seems like the way to go, if one could figure out how to make it work.
@@ -644,7 +644,98 @@ class Apples2ApplesTest {
 		}
 	}
 
-	// TODO: Test 12. All players are given new red apples until they have 7 red apples
+	// Test 12. All players are given new red apples until they have 7 red apples
+	@Test
+	public void testAllPlayersReceiveNewRedApplesUntilTheyHaveSeven() throws Exception {
+		// Arrange
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(player3);
+
+		// Deal initial red apples to players
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(5); // Deal only 5 cards initially
+			player.getHand().addAll(initialHand);
+		}
+
+		// Use the real PlayerManager and GameManager
+		PlayerManager realPlayerManager = new PlayerManager();
+		realPlayerManager.addPlayer(player1);
+		realPlayerManager.addPlayer(player2);
+		realPlayerManager.addPlayer(player3);
+		realPlayerManager.initializeJudgeIndex();
+
+		GameManager realGameManager = new GameManager(deckManager, realPlayerManager, mockGameRules,
+				mockNetworkManager);
+
+		// Act
+		// Refill players' hands using the existing logic in DeckManager
+		for (Player player : players) {
+			int cardsNeeded = Constants.INITIAL_HAND_SIZE - player.getHand().size();
+			if (cardsNeeded > 0) {
+				ArrayList<Card> newCards = deckManager.dealInitialHand(cardsNeeded);
+				player.getHand().addAll(newCards);
+			}
+		}
+
+		// Assert
+		// Verify all players have 7 cards in their hands
+		for (Player player : players) {
+			assertEquals(7, player.getHand().size(),
+					"Each player should have " + 7 + " red apples after dealing new cards.");
+		}
+	}
+
+	// Test 12, version 2. This version testes the GameManager dealCards(), instead of DeckManager dealInitialHand().
+	@Test
+	public void testAllPlayersReceiveNewRedApplesUntilTheyHaveSevenV2() throws Exception {
+		// Arrange
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		// Give each player 5 cards initially
+		for (Player player : Arrays.asList(player1, player2, player3)) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(5);
+			player.getHand().addAll(initialHand);
+		}
+
+		PlayerManager realPlayerManager = new PlayerManager();
+		realPlayerManager.addPlayer(player1);
+		realPlayerManager.addPlayer(player2);
+		realPlayerManager.addPlayer(player3);
+		realPlayerManager.initializeJudgeIndex();
+
+		GameManager gameManager = new GameManager(deckManager, realPlayerManager, mockGameRules, mockNetworkManager);
+
+		// Act
+		// Simulate players playing cards (removing one card from each non-judge player)
+		Player judge = realPlayerManager.getJudge();
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+
+		for (Player player : realPlayerManager.getActivePlayers()) {
+			if (player != judge) {
+				Card playedCard = player.getHand().remove(0); // Remove first card
+				playedApples.add(new PlayedApple(player.getPlayerID(), playedCard));
+			}
+		}
+
+		// Simulate dealer replenishing cards
+		gameManager.dealCards();
+
+		// Assert
+		for (Player player : realPlayerManager.getActivePlayers()) {
+			if (player != judge) {
+				assertEquals(5, player.getHand().size(),
+						"Each non-judge player should have their hand replenished after playing");
+			}
+		}
+	}
 
 	// TODO: Test 13. The next player in the list becomes the judge. Repeat from step 6 until someone wins the game.
 }

@@ -100,7 +100,7 @@ public class GameManager {
 		dealCards();
 	}
 
-	private void dealCards() {
+	public void dealCards() {
 		for (Player player : playerManager.getActivePlayers()) {
 			if (player != playerManager.getJudge()) {
 				Card redCard = deckManager.drawRedApple();
