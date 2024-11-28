@@ -932,6 +932,7 @@ class Apples2ApplesTest {
 		assertTrue(gameRules.isGameOver(players8), "Player should win with 4 green apples for 8 players.");
 	}
 
+	// Helper function to test 15
 	private ArrayList<Card> createGreenApples(int count) {
 		ArrayList<Card> greenApples = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
