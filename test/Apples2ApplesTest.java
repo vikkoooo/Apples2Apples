@@ -879,4 +879,64 @@ class Apples2ApplesTest {
 	// • For 6 players, 6 green apples win.
 	// • For 7 players, 5 green apples win.
 	// • For 8+ players, 4 green apples win.
+	@Test
+	public void testWinConditions() throws Exception {
+		// Arrange
+		GameRules gameRules = new GameRules();
+
+		// Test for 4 players
+		ArrayList<Player> players4 = new ArrayList<>();
+		for (int i = 1; i <= 4; i++) {
+			Player player = new Player(i, new ArrayList<>(), false);
+			players4.add(player);
+		}
+		players4.get(0).getGreenApples().addAll(createGreenApples(8)); // Player 1 wins with 8 green apples
+
+		// Test for 5 players
+		ArrayList<Player> players5 = new ArrayList<>();
+		for (int i = 1; i <= 5; i++) {
+			Player player = new Player(i, new ArrayList<>(), false);
+			players5.add(player);
+		}
+		players5.get(0).getGreenApples().addAll(createGreenApples(7)); // Player 1 wins with 7 green apples
+
+		// Test for 6 players
+		ArrayList<Player> players6 = new ArrayList<>();
+		for (int i = 1; i <= 6; i++) {
+			Player player = new Player(i, new ArrayList<>(), false);
+			players6.add(player);
+		}
+		players6.get(0).getGreenApples().addAll(createGreenApples(6)); // Player 1 wins with 6 green apples
+
+		// Test for 7 players
+		ArrayList<Player> players7 = new ArrayList<>();
+		for (int i = 1; i <= 7; i++) {
+			Player player = new Player(i, new ArrayList<>(), false);
+			players7.add(player);
+		}
+		players7.get(0).getGreenApples().addAll(createGreenApples(5)); // Player 1 wins with 5 green apples
+
+		// Test for 8 players
+		ArrayList<Player> players8 = new ArrayList<>();
+		for (int i = 1; i <= 8; i++) {
+			Player player = new Player(i, new ArrayList<>(), false);
+			players8.add(player);
+		}
+		players8.get(0).getGreenApples().addAll(createGreenApples(4)); // Player 1 wins with 4 green apples
+
+		// Act & Assert
+		assertTrue(gameRules.isGameOver(players4), "Player should win with 8 green apples for 4 players.");
+		assertTrue(gameRules.isGameOver(players5), "Player should win with 7 green apples for 5 players.");
+		assertTrue(gameRules.isGameOver(players6), "Player should win with 6 green apples for 6 players.");
+		assertTrue(gameRules.isGameOver(players7), "Player should win with 5 green apples for 7 players.");
+		assertTrue(gameRules.isGameOver(players8), "Player should win with 4 green apples for 8 players.");
+	}
+
+	private ArrayList<Card> createGreenApples(int count) {
+		ArrayList<Card> greenApples = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			greenApples.add(new GreenApple("GreenApple" + i));
+		}
+		return greenApples;
+	}
 }
