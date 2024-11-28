@@ -737,7 +737,7 @@ class Apples2ApplesTest {
 		}
 	}
 
-	// TODO: Test 13. The next player in the list becomes the judge. Repeat from step 6 until someone wins the game.
+	// Test 13. The next player in the list becomes the judge. Repeat from step 6 until someone wins the game.
 	@Test
 	public void testJudgeRotationAndRestartGameplay() throws Exception {
 		// Arrange
@@ -802,4 +802,81 @@ class Apples2ApplesTest {
 		}
 	}
 
+	//TODO: Test 14. Keep score by keeping the green apples you’ve won.
+	@Test
+	public void testKeepScoreByKeepingGreenApples() throws Exception {
+		// Arrange
+		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
+
+		Player player1 = new Player(1, new ArrayList<>(), false);
+		Player player2 = new Player(2, new ArrayList<>(), false);
+		Player player3 = new Player(3, new ArrayList<>(), false);
+
+		setPlayerStrategy(player1, mock(IPlayerStrategy.class));
+		setPlayerStrategy(player2, mock(IPlayerStrategy.class));
+		setPlayerStrategy(player3, mockJudgeStrategy);
+
+		ArrayList<Player> players = new ArrayList<>();
+		players.add(player1);
+		players.add(player2);
+		players.add(player3);
+
+		// Deal initial red apples to players
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			player.getHand().addAll(initialHand);
+		}
+
+		// Use the real PlayerManager and GameManager
+		PlayerManager realPlayerManager = new PlayerManager();
+		realPlayerManager.addPlayer(player1);
+		realPlayerManager.addPlayer(player2);
+		realPlayerManager.addPlayer(player3);
+		realPlayerManager.initializeJudgeIndex();
+
+		GameManager realGameManager = new GameManager(deckManager, realPlayerManager, mockGameRules,
+				mockNetworkManager);
+
+		// Act
+		// Get the initial judge
+		Player judge = realPlayerManager.getJudge();
+
+		// Simulate players playing cards
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+		for (Player player : realPlayerManager.getActivePlayers()) {
+			if (player != judge) {
+				Card playedCard = player.getHand().remove(0); // Remove first card
+				playedApples.add(new PlayedApple(player.getPlayerID(), playedCard));
+			}
+		}
+
+		// Mock the judge's decision
+		PlayedApple winningApple = playedApples.get(0); // Assume the first played apple is the winner
+		when(mockJudgeStrategy.judge(any(ArrayList.class))).thenReturn(winningApple);
+
+		// Ensure the judge uses the mock strategy
+		setPlayerStrategy(judge, mockJudgeStrategy);
+
+		// Simulate judge selecting a winner
+		PlayedApple selectedCard = judge.judge(playedApples);
+
+		// Award green apple to the winner
+		Card greenApple = deckManager.drawGreenApple();
+		realPlayerManager.getActivePlayers().get(selectedCard.playerID).getGreenApples().add(greenApple);
+
+		// Assert
+		// Verify that the winner received a green apple
+		assertEquals(1, realPlayerManager.getActivePlayers().get(selectedCard.playerID).getGreenApples().size(),
+				"The winner should have received one green apple.");
+		assertEquals(greenApple,
+				realPlayerManager.getActivePlayers().get(selectedCard.playerID).getGreenApples().get(0),
+				"The winner should have received the correct green apple.");
+	}
+
+	//TODO: Test 15. Here’s how to tell when the game is over:
+	// • For 4 players, 8 green apples win.
+	// • For 5 players, 7 green apples win.
+	// • For 6 players, 6 green apples win.
+	// • For 7 players, 5 green apples win.
+	// • For 8+ players, 4 green apples win.
 }
