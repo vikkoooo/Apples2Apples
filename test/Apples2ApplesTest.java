@@ -173,16 +173,10 @@ class Apples2ApplesTest {
 
 	// Test 5. Randomise which player starts being the judge.
 	@Test
-	public void testRandomizeWhichPlayerStartsBeingTheJudge() {
+	public void testRandomizeWhichPlayerStartsBeingTheJudge() throws Exception {
 		// Arrange
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
-
-		PlayerManager playerManager = new PlayerManager();
-		playerManager.addPlayer(player1);
-		playerManager.addPlayer(player2);
-		playerManager.addPlayer(player3);
+		ArrayList<Player> players = createPlayers(3);
+		PlayerManager playerManager = setupPlayerManager(players);
 
 		Set<Integer> judgeIds = new HashSet<>();
 
@@ -193,9 +187,10 @@ class Apples2ApplesTest {
 		}
 
 		// Assert
-		assertTrue(judgeIds.contains(player1.getPlayerID()), "Player 1 should have been the judge at least once.");
-		assertTrue(judgeIds.contains(player2.getPlayerID()), "Player 2 should have been the judge at least once.");
-		assertTrue(judgeIds.contains(player3.getPlayerID()), "Player 3 should have been the judge at least once.");
+		for (Player player : players) {
+			assertTrue(judgeIds.contains(player.getPlayerID()),
+					"Player " + player.getPlayerID() + " should have been the judge at least once.");
+		}
 	}
 
 	// Test 6. A green apple is drawn from the pile and shown to everyone
@@ -210,27 +205,11 @@ class Apples2ApplesTest {
 
 	// Test 7. All players (except the judge) choose one red apple from their hand (based on the green apple) and plays it.
 	@Test
-	public void testPlayersPlayRedApple() {
+	public void testPlayersPlayRedApple() throws Exception {
 		// Arrange
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player judge = new Player(3, new ArrayList<>(), false);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(judge);
-
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		PlayerManager playerManager = new PlayerManager();
-		playerManager.addPlayer(player1);
-		playerManager.addPlayer(player2);
-		playerManager.addPlayer(judge);
-		playerManager.initializeJudgeIndex();
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager playerManager = setupPlayerManager(players);
 
 		ArrayList<Card> playedCards = new ArrayList<>();
 
@@ -254,27 +233,11 @@ class Apples2ApplesTest {
 
 	// Test 8. The printed order of the played red apples should be randomised before shown to everyone.
 	@Test
-	public void testRandomizeOrderOfPlayedRedApples() {
+	public void testRandomizeOrderOfPlayedRedApples() throws Exception {
 		// Arrange
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player judge = new Player(3, new ArrayList<>(), false);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(judge);
-
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		PlayerManager playerManager = new PlayerManager();
-		playerManager.addPlayer(player1);
-		playerManager.addPlayer(player2);
-		playerManager.addPlayer(judge);
-		playerManager.initializeJudgeIndex();
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager playerManager = setupPlayerManager(players);
 
 		ArrayList<Card> playedCards = new ArrayList<>();
 
