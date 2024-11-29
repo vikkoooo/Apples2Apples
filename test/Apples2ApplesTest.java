@@ -447,41 +447,24 @@ class Apples2ApplesTest {
 	@Test
 	public void testSubmittedRedApplesAreDiscardedNotWorking() throws Exception {
 		// Arrange
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager playerManager = setupPlayerManager(players);
+
+		// Set up mock strategies
 		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
-
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
-
-		setPlayerStrategy(player1, mockStrategy1);
-		setPlayerStrategy(player2, mockStrategy2);
-		setPlayerStrategy(player3, mockJudgeStrategy);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(player3);
-
-		// Deal red apples to players
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		PlayerManager playerManager = new PlayerManager();
-		playerManager.addPlayer(player1);
-		playerManager.addPlayer(player2);
-		playerManager.addPlayer(player3);
-		playerManager.initializeJudgeIndex();
+		setPlayerStrategy(players.get(0), mockStrategy1);
+		setPlayerStrategy(players.get(1), mockStrategy2);
+		setPlayerStrategy(players.get(2), mockJudgeStrategy);
 
 		Player selectedJudge = playerManager.getJudge();
 		ArrayList<PlayedApple> playedApples = new ArrayList<>();
 
 		// Keep track of initial hands
-		ArrayList<Card> player1InitialHand = new ArrayList<>(player1.getHand());
-		ArrayList<Card> player2InitialHand = new ArrayList<>(player2.getHand());
+		ArrayList<Card> player1InitialHand = new ArrayList<>(players.get(0).getHand());
+		ArrayList<Card> player2InitialHand = new ArrayList<>(players.get(1).getHand());
 
 		// Act
 		// Players play their cards
@@ -526,8 +509,8 @@ class Apples2ApplesTest {
 
 		// Verify played cards are no longer in players' hands
 		for (Card card : player1InitialHand) {
-			if (!player1.getHand().contains(card)) {
-				assertFalse(playedApples.contains(new PlayedApple(player1.getPlayerID(), card)),
+			if (!players.get(0).getHand().contains(card)) {
+				assertFalse(playedApples.contains(new PlayedApple(players.get(0).getPlayerID(), card)),
 						"Played card should be discarded");
 			}
 		}
