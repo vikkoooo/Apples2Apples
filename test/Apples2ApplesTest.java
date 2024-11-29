@@ -589,28 +589,9 @@ class Apples2ApplesTest {
 	@Test
 	public void testJudgeRotationAndRestartGameplay() throws Exception {
 		// Arrange
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(player3);
-
-		// Deal initial red apples to players
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		// Use the real PlayerManager and GameManager
-		PlayerManager realPlayerManager = new PlayerManager();
-		realPlayerManager.addPlayer(player1);
-		realPlayerManager.addPlayer(player2);
-		realPlayerManager.addPlayer(player3);
-		realPlayerManager.initializeJudgeIndex();
-
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager realPlayerManager = setupPlayerManager(players);
 		GameManager realGameManager = new GameManager(deckManager, realPlayerManager, mockGameRules,
 				mockNetworkManager);
 
@@ -780,7 +761,7 @@ class Apples2ApplesTest {
 		assertTrue(gameRules.isGameOver(players8), "Player should win with 4 green apples for 8 players.");
 	}
 
-	// Helper function to create Players, used in tests 4, 5, 7, 8, 9, 10, 11, 14, 15
+	// Helper function to create Players, used in tests 4, 5, 7, 8, 9, 10, 11, 13, 14, 15
 	private ArrayList<Player> createPlayers(int numPlayers) throws Exception {
 		ArrayList<Player> players = new ArrayList<>();
 		for (int i = 1; i <= numPlayers; i++) {
@@ -791,7 +772,7 @@ class Apples2ApplesTest {
 		return players;
 	}
 
-	// Helper function to deal initial hands to players, used in tests 4, 7, 8, 9, 10, 11, 14
+	// Helper function to deal initial hands to players, used in tests 4, 7, 8, 9, 10, 11, 13, 14
 	private void dealInitialHandsToPlayers(ArrayList<Player> players) {
 		for (Player player : players) {
 			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
@@ -799,7 +780,7 @@ class Apples2ApplesTest {
 		}
 	}
 
-	// Helper function to setup PlayerManager, used in tests 4, 5, 7, 8, 9, 10, 11, 14
+	// Helper function to setup PlayerManager, used in tests 4, 5, 7, 8, 9, 10, 11, 13, 14
 	private PlayerManager setupPlayerManager(ArrayList<Player> players) {
 		PlayerManager playerManager = new PlayerManager();
 		for (Player player : players) {
