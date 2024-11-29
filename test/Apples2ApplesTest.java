@@ -270,40 +270,23 @@ class Apples2ApplesTest {
 	@Test
 	public void testAllPlayersPlayRedApplesBeforeResults() throws Exception {
 		// Arrange
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager playerManager = setupPlayerManager(players);
+
+		// Set up mock strategies
 		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockStrategyJudge = mock(IPlayerStrategy.class);
-
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
-
-		// Use reflection to set the strategy field
-		setPlayerStrategy(player1, mockStrategy1);
-		setPlayerStrategy(player2, mockStrategy2);
-		setPlayerStrategy(player3, mockStrategyJudge);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(player3);
-
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		PlayerManager playerManager = new PlayerManager();
-		playerManager.addPlayer(player1);
-		playerManager.addPlayer(player2);
-		playerManager.addPlayer(player3);
-		playerManager.initializeJudgeIndex();
+		setPlayerStrategy(players.get(0), mockStrategy1);
+		setPlayerStrategy(players.get(1), mockStrategy2);
+		setPlayerStrategy(players.get(2), mockStrategyJudge);
 
 		ArrayList<PlayedApple> playedApples = new ArrayList<>();
 
 		// Act
 		for (Player player : players) {
-			if (!player.equals(playerManager.getJudge())) { // Changed comparison to equals()
+			if (!player.equals(playerManager.getJudge())) {
 				player.play(playedApples);
 			}
 		}
@@ -327,34 +310,17 @@ class Apples2ApplesTest {
 	@Test
 	public void testJudgeSelectsWinnerAndAwardsGreenApple() throws Exception {
 		// Arrange
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager playerManager = setupPlayerManager(players);
+
+		// Set up mock strategies
 		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
-
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
-
-		setPlayerStrategy(player1, mockStrategy1);
-		setPlayerStrategy(player2, mockStrategy2);
-		setPlayerStrategy(player3, mockJudgeStrategy);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(player3);
-
-		// Deal red apples to players
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		PlayerManager playerManager = new PlayerManager();
-		playerManager.addPlayer(player1);
-		playerManager.addPlayer(player2);
-		playerManager.addPlayer(player3);
-		playerManager.initializeJudgeIndex();
+		setPlayerStrategy(players.get(0), mockStrategy1);
+		setPlayerStrategy(players.get(1), mockStrategy2);
+		setPlayerStrategy(players.get(2), mockJudgeStrategy);
 
 		// Draw green apple for the round
 		Card greenApple = deckManager.drawGreenApple();
@@ -364,7 +330,7 @@ class Apples2ApplesTest {
 		Player judge = playerManager.getJudge();
 
 		// Set up mock for the actual judge's strategy
-		PlayedApple winningCard = new PlayedApple(player1.getPlayerID(), player1.getHand().get(0));
+		PlayedApple winningCard = new PlayedApple(players.get(0).getPlayerID(), players.get(0).getHand().get(0));
 		when(mockJudgeStrategy.judge(any(ArrayList.class))).thenReturn(winningCard);
 		setPlayerStrategy(judge, mockJudgeStrategy); // Set strategy for actual judge
 
@@ -404,34 +370,17 @@ class Apples2ApplesTest {
 	@Test
 	public void testSubmittedRedApplesAreDiscarded() throws Exception {
 		// Arrange
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager playerManager = setupPlayerManager(players);
+
+		// Set up mock strategies
 		IPlayerStrategy mockStrategy1 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockStrategy2 = mock(IPlayerStrategy.class);
 		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
-
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
-
-		setPlayerStrategy(player1, mockStrategy1);
-		setPlayerStrategy(player2, mockStrategy2);
-		setPlayerStrategy(player3, mockJudgeStrategy);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(player3);
-
-		// Deal red apples to players
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		PlayerManager playerManager = new PlayerManager();
-		playerManager.addPlayer(player1);
-		playerManager.addPlayer(player2);
-		playerManager.addPlayer(player3);
-		playerManager.initializeJudgeIndex();
+		setPlayerStrategy(players.get(0), mockStrategy1);
+		setPlayerStrategy(players.get(1), mockStrategy2);
+		setPlayerStrategy(players.get(2), mockJudgeStrategy);
 
 		Player selectedJudge = playerManager.getJudge();
 		ArrayList<PlayedApple> playedApples = new ArrayList<>();
@@ -441,22 +390,23 @@ class Apples2ApplesTest {
 		for (Player player : players) {
 			initialHands.put(player.getPlayerID(), new ArrayList<>(player.getHand()));
 		}
+
 		// Set up mock strategies to simulate card removal and adding to playedApples
 		doAnswer(invocation -> {
 			ArrayList<PlayedApple> playedApplesArg = invocation.getArgument(0);
 			int playerID = invocation.getArgument(1);
-			Card playedCard = player1.getHand().remove(0);
+			Card playedCard = players.get(0).getHand().remove(0);
 			playedApplesArg.add(new PlayedApple(playerID, playedCard));
 			return null;
-		}).when(mockStrategy1).play(any(ArrayList.class), eq(player1.getPlayerID()));
+		}).when(mockStrategy1).play(any(ArrayList.class), eq(players.get(0).getPlayerID()));
 
 		doAnswer(invocation -> {
 			ArrayList<PlayedApple> playedApplesArg = invocation.getArgument(0);
 			int playerID = invocation.getArgument(1);
-			Card playedCard = player2.getHand().remove(0);
+			Card playedCard = players.get(1).getHand().remove(0);
 			playedApplesArg.add(new PlayedApple(playerID, playedCard));
 			return null;
-		}).when(mockStrategy2).play(any(ArrayList.class), eq(player2.getPlayerID()));
+		}).when(mockStrategy2).play(any(ArrayList.class), eq(players.get(1).getPlayerID()));
 
 		// Act
 		// Players play their cards
