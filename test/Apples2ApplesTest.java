@@ -550,22 +550,15 @@ class Apples2ApplesTest {
 	@Test
 	public void testAllPlayersReceiveNewRedApplesUntilTheyHaveSevenV2() throws Exception {
 		// Arrange
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
+		ArrayList<Player> players = createPlayers(3);
 
 		// Give each player 5 cards initially
-		for (Player player : Arrays.asList(player1, player2, player3)) {
+		for (Player player : players) {
 			ArrayList<Card> initialHand = deckManager.dealInitialHand(5);
 			player.getHand().addAll(initialHand);
 		}
 
-		PlayerManager realPlayerManager = new PlayerManager();
-		realPlayerManager.addPlayer(player1);
-		realPlayerManager.addPlayer(player2);
-		realPlayerManager.addPlayer(player3);
-		realPlayerManager.initializeJudgeIndex();
-
+		PlayerManager realPlayerManager = setupPlayerManager(players);
 		GameManager gameManager = new GameManager(deckManager, realPlayerManager, mockGameRules, mockNetworkManager);
 
 		// Act
