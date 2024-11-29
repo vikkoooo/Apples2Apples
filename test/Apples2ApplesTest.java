@@ -631,40 +631,17 @@ class Apples2ApplesTest {
 		}
 	}
 
-	//Test 14. Keep score by keeping the green apples you’ve won.
+	// Test 14. Keep score by keeping the green apples you’ve won.
 	@Test
 	public void testKeepScoreByKeepingGreenApples() throws Exception {
 		// Arrange
+		ArrayList<Player> players = createPlayers(3);
+		dealInitialHandsToPlayers(players);
+		PlayerManager realPlayerManager = setupPlayerManager(players);
+
+		// Set up mock strategies
 		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
-
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player player3 = new Player(3, new ArrayList<>(), false);
-
-		setPlayerStrategy(player1, mock(IPlayerStrategy.class));
-		setPlayerStrategy(player2, mock(IPlayerStrategy.class));
-		setPlayerStrategy(player3, mockJudgeStrategy);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(player3);
-
-		// Deal initial red apples to players
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
-
-		// Use the real PlayerManager and GameManager
-		PlayerManager realPlayerManager = new PlayerManager();
-		realPlayerManager.addPlayer(player1);
-		realPlayerManager.addPlayer(player2);
-		realPlayerManager.addPlayer(player3);
-		realPlayerManager.initializeJudgeIndex();
-
-		GameManager realGameManager = new GameManager(deckManager, realPlayerManager, mockGameRules,
-				mockNetworkManager);
+		setPlayerStrategy(players.get(2), mockJudgeStrategy);
 
 		// Act
 		// Get the initial judge
@@ -714,43 +691,23 @@ class Apples2ApplesTest {
 		GameRules gameRules = new GameRules();
 
 		// Test for 4 players
-		ArrayList<Player> players4 = new ArrayList<>();
-		for (int i = 1; i <= 4; i++) {
-			Player player = new Player(i, new ArrayList<>(), false);
-			players4.add(player);
-		}
+		ArrayList<Player> players4 = createPlayers(4);
 		players4.get(0).getGreenApples().addAll(createGreenApples(8)); // Player 1 wins with 8 green apples
 
 		// Test for 5 players
-		ArrayList<Player> players5 = new ArrayList<>();
-		for (int i = 1; i <= 5; i++) {
-			Player player = new Player(i, new ArrayList<>(), false);
-			players5.add(player);
-		}
+		ArrayList<Player> players5 = createPlayers(5);
 		players5.get(0).getGreenApples().addAll(createGreenApples(7)); // Player 1 wins with 7 green apples
 
 		// Test for 6 players
-		ArrayList<Player> players6 = new ArrayList<>();
-		for (int i = 1; i <= 6; i++) {
-			Player player = new Player(i, new ArrayList<>(), false);
-			players6.add(player);
-		}
+		ArrayList<Player> players6 = createPlayers(6);
 		players6.get(0).getGreenApples().addAll(createGreenApples(6)); // Player 1 wins with 6 green apples
 
 		// Test for 7 players
-		ArrayList<Player> players7 = new ArrayList<>();
-		for (int i = 1; i <= 7; i++) {
-			Player player = new Player(i, new ArrayList<>(), false);
-			players7.add(player);
-		}
+		ArrayList<Player> players7 = createPlayers(7);
 		players7.get(0).getGreenApples().addAll(createGreenApples(5)); // Player 1 wins with 5 green apples
 
 		// Test for 8 players
-		ArrayList<Player> players8 = new ArrayList<>();
-		for (int i = 1; i <= 8; i++) {
-			Player player = new Player(i, new ArrayList<>(), false);
-			players8.add(player);
-		}
+		ArrayList<Player> players8 = createPlayers(8);
 		players8.get(0).getGreenApples().addAll(createGreenApples(4)); // Player 1 wins with 4 green apples
 
 		// Act & Assert
@@ -761,7 +718,7 @@ class Apples2ApplesTest {
 		assertTrue(gameRules.isGameOver(players8), "Player should win with 4 green apples for 8 players.");
 	}
 
-	// Helper function to create Players, used in tests 4, 5, 7, 8, 9, 10, 11, 13, 14, 15
+	// Helper function to create Players, used in tests 4, 5, 7, 8, 9, 10, 11, 12, 12 V2, 13, 14, 15
 	private ArrayList<Player> createPlayers(int numPlayers) throws Exception {
 		ArrayList<Player> players = new ArrayList<>();
 		for (int i = 1; i <= numPlayers; i++) {
@@ -772,7 +729,7 @@ class Apples2ApplesTest {
 		return players;
 	}
 
-	// Helper function to deal initial hands to players, used in tests 4, 7, 8, 9, 10, 11, 13, 14
+	// Helper function to deal initial hands to players, used in tests 4, 7, 8, 9, 10, 11, 12, 12 V2, 13, 14
 	private void dealInitialHandsToPlayers(ArrayList<Player> players) {
 		for (Player player : players) {
 			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
@@ -780,7 +737,7 @@ class Apples2ApplesTest {
 		}
 	}
 
-	// Helper function to setup PlayerManager, used in tests 4, 5, 7, 8, 9, 10, 11, 13, 14
+	// Helper function to setup PlayerManager, used in tests 4, 5, 7, 8, 9, 10, 11, 12, 12 V2, 13, 14
 	private PlayerManager setupPlayerManager(ArrayList<Player> players) {
 		PlayerManager playerManager = new PlayerManager();
 		for (Player player : players) {
@@ -790,26 +747,7 @@ class Apples2ApplesTest {
 		return playerManager;
 	}
 
-	// Helper function to simulate players playing cards, used in tests 7, 8, 9, 10, 11, 14
-	private ArrayList<PlayedApple> simulatePlayersPlayingCards(ArrayList<Player> players, Player judge) {
-		ArrayList<PlayedApple> playedApples = new ArrayList<>();
-		for (Player player : players) {
-			if (player != judge) {
-				Card playedCard = player.getHand().remove(0);
-				playedApples.add(new PlayedApple(player.getPlayerID(), playedCard));
-			}
-		}
-		return playedApples;
-	}
-
-	// Helper function to setup judge strategy, used in tests 9, 10, 14
-	private void setupJudgeStrategy(Player judge, PlayedApple winningApple) throws Exception {
-		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
-		when(mockJudgeStrategy.judge(any(ArrayList.class))).thenReturn(winningApple);
-		setPlayerStrategy(judge, mockJudgeStrategy);
-	}
-
-	// Helper function to set player strategy using reflection, used in tests 9, 10, 14
+	// Helper function to set player strategy using reflection, used in tests 9, 10, 11, 14
 	private void setPlayerStrategy(Player player, IPlayerStrategy strategy) throws Exception {
 		Field strategyField = Player.class.getDeclaredField("strategy");
 		strategyField.setAccessible(true);
