@@ -158,22 +158,12 @@ class Apples2ApplesTest {
 
 	// Test 4. Deal seven red apples to each player, including the judge.
 	@Test
-	public void testDealSevenRedApplesToEachPlayer() {
+	public void testDealSevenRedApplesToEachPlayer() throws Exception {
 		// Arrange
-		Player player1 = new Player(1, new ArrayList<>(), false);
-		Player player2 = new Player(2, new ArrayList<>(), false);
-		Player judge = new Player(3, new ArrayList<>(), false);
-
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(player1);
-		players.add(player2);
-		players.add(judge);
+		ArrayList<Player> players = createPlayers(3);
 
 		// Act
-		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
-			player.getHand().addAll(initialHand);
-		}
+		dealInitialHandsToPlayers(players);
 
 		// Assert
 		for (Player player : players) {
@@ -368,20 +358,6 @@ class Apples2ApplesTest {
 						.play(any(ArrayList.class), eq(player.getPlayerID()));
 			}
 		}
-	}
-
-	// Helper function to Test 9
-	private void setPlayerStrategy(Player player, IPlayerStrategy strategy) throws Exception {
-		Field strategyField = Player.class.getDeclaredField("strategy");
-		strategyField.setAccessible(true);
-		strategyField.set(player, strategy);
-	}
-
-	// Helper function to Test 9
-	private IPlayerStrategy getPlayerStrategy(Player player) throws Exception {
-		Field strategyField = Player.class.getDeclaredField("strategy");
-		strategyField.setAccessible(true);
-		return (IPlayerStrategy) strategyField.get(player);
 	}
 
 	// Test 10. The judge selects a favourite red apple. The player who submitted the favourite red apple is rewarded the green apple as a point (rule 14).
@@ -676,7 +652,7 @@ class Apples2ApplesTest {
 		// Act
 		// Refill players' hands using the existing logic in DeckManager
 		for (Player player : players) {
-			int cardsNeeded = Constants.INITIAL_HAND_SIZE - player.getHand().size();
+			int cardsNeeded = 7 - player.getHand().size();
 			if (cardsNeeded > 0) {
 				ArrayList<Card> newCards = deckManager.dealInitialHand(cardsNeeded);
 				player.getHand().addAll(newCards);
@@ -752,7 +728,7 @@ class Apples2ApplesTest {
 
 		// Deal initial red apples to players
 		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
 			player.getHand().addAll(initialHand);
 		}
 
@@ -802,7 +778,7 @@ class Apples2ApplesTest {
 		}
 	}
 
-	//TODO: Test 14. Keep score by keeping the green apples you’ve won.
+	//Test 14. Keep score by keeping the green apples you’ve won.
 	@Test
 	public void testKeepScoreByKeepingGreenApples() throws Exception {
 		// Arrange
@@ -823,7 +799,7 @@ class Apples2ApplesTest {
 
 		// Deal initial red apples to players
 		for (Player player : players) {
-			ArrayList<Card> initialHand = deckManager.dealInitialHand(Constants.INITIAL_HAND_SIZE);
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
 			player.getHand().addAll(initialHand);
 		}
 
@@ -873,7 +849,7 @@ class Apples2ApplesTest {
 				"The winner should have received the correct green apple.");
 	}
 
-	//TODO: Test 15. Here’s how to tell when the game is over:
+	// Test 15. Here’s how to tell when the game is over:
 	// • For 4 players, 8 green apples win.
 	// • For 5 players, 7 green apples win.
 	// • For 6 players, 6 green apples win.
@@ -932,7 +908,69 @@ class Apples2ApplesTest {
 		assertTrue(gameRules.isGameOver(players8), "Player should win with 4 green apples for 8 players.");
 	}
 
-	// Helper function to test 15
+	// Helper function to create Players, used in tests 4, 5, 7, 8, 9, 10, 11, 14, 15
+	private ArrayList<Player> createPlayers(int numPlayers) throws Exception {
+		ArrayList<Player> players = new ArrayList<>();
+		for (int i = 1; i <= numPlayers; i++) {
+			Player player = new Player(i, new ArrayList<>(), false);
+			setPlayerStrategy(player, mock(IPlayerStrategy.class));
+			players.add(player);
+		}
+		return players;
+	}
+
+	// Helper function to deal initial hands to players, used in tests 4, 7, 8, 9, 10, 11, 14
+	private void dealInitialHandsToPlayers(ArrayList<Player> players) {
+		for (Player player : players) {
+			ArrayList<Card> initialHand = deckManager.dealInitialHand(7);
+			player.getHand().addAll(initialHand);
+		}
+	}
+
+	// Helper function to setup PlayerManager, used in tests 4, 5, 7, 8, 9, 10, 11, 14
+	private PlayerManager setupPlayerManager(ArrayList<Player> players) {
+		PlayerManager playerManager = new PlayerManager();
+		for (Player player : players) {
+			playerManager.addPlayer(player);
+		}
+		playerManager.initializeJudgeIndex();
+		return playerManager;
+	}
+
+	// Helper function to simulate players playing cards, used in tests 7, 8, 9, 10, 11, 14
+	private ArrayList<PlayedApple> simulatePlayersPlayingCards(ArrayList<Player> players, Player judge) {
+		ArrayList<PlayedApple> playedApples = new ArrayList<>();
+		for (Player player : players) {
+			if (player != judge) {
+				Card playedCard = player.getHand().remove(0);
+				playedApples.add(new PlayedApple(player.getPlayerID(), playedCard));
+			}
+		}
+		return playedApples;
+	}
+
+	// Helper function to setup judge strategy, used in tests 9, 10, 14
+	private void setupJudgeStrategy(Player judge, PlayedApple winningApple) throws Exception {
+		IPlayerStrategy mockJudgeStrategy = mock(IPlayerStrategy.class);
+		when(mockJudgeStrategy.judge(any(ArrayList.class))).thenReturn(winningApple);
+		setPlayerStrategy(judge, mockJudgeStrategy);
+	}
+
+	// Helper function to set player strategy using reflection, used in tests 9, 10, 14
+	private void setPlayerStrategy(Player player, IPlayerStrategy strategy) throws Exception {
+		Field strategyField = Player.class.getDeclaredField("strategy");
+		strategyField.setAccessible(true);
+		strategyField.set(player, strategy);
+	}
+
+	// Helper function to get player strategy using reflection, used in test 9
+	private IPlayerStrategy getPlayerStrategy(Player player) throws Exception {
+		Field strategyField = Player.class.getDeclaredField("strategy");
+		strategyField.setAccessible(true);
+		return (IPlayerStrategy) strategyField.get(player);
+	}
+
+	// Helper function to create green apples, used in test 15
 	private ArrayList<Card> createGreenApples(int count) {
 		ArrayList<Card> greenApples = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
