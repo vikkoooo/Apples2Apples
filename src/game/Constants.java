@@ -1,5 +1,9 @@
 package src.game;
 
+/**
+ * Contains game-wide constant values used throughout the application.
+ * Defines network settings, game rules, and file paths.
+ */
 public class Constants {
 	public static final int PORT = 2048;
 	public static final int INITIAL_HAND_SIZE = 7;
